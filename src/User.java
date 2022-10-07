@@ -4,11 +4,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class User {
-    @JsonProperty("id")int id;
-    @JsonProperty("firstName")String firstName;
-    @JsonProperty("lastName")String lastName;
-    @JsonProperty("amount") double amount;
-    @JsonProperty("boughtList")ArrayList<Product> boughtList;
+   int id;
+    String firstName;
+    String lastName;
+    double amount;
+    ArrayList<Product> boughtList;
 
     public User(int id, String firstName, String lastName, double amount) {
         this.id = id;
@@ -16,6 +16,12 @@ public class User {
         this.lastName = lastName;
         this.amount = amount;
         this.boughtList = new ArrayList<>();
+    }
+
+    public User(Object id, Object firstName, Object lastName) {
+        this.id = (int) id;
+        this.firstName = (String) firstName;
+        this.lastName = (String) lastName;
     }
 
     public int getId() {

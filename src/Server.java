@@ -120,12 +120,20 @@ public class Server {
             try {
                 ObjectMapper mapper = new ObjectMapper();
                 BufferedReader br = new BufferedReader(new FileReader(f.getAbsolutePath()));
-                HashMap user = mapper.readValue(br.readLine(),HashMap.class);
+                HashMap user = mapper.readValue(br.readLine(), HashMap.class);
                 User newUser = new User((Integer) user.get("id"), (String) user.get("firstName"),
-                               (String) user.get("lastName"), (Double) user.get("amount"));
+                        (String) user.get("lastName"), (Double) user.get("amount"));
+                ArrayList <HashMap> boughtlist = (ArrayList<HashMap>) user.get("boughtlist");
+                for (int j = 0; j < boughtlist.size(); j++) {
+                    HashMap <String,Object> productHash = boughtlist.get(j);
+                    Product product = new Product((Integer) productHash.get("id"), (String) productHash.get("name"),
+                            (Double) productHash.get("price"));
+                    newUser.boughtList.add(product);
+                }
                 users.add(newUser);
                 br.close();
-            } catch (IOException ignored) {}
+            } catch (IOException ignored) {
+            }
         }
 
         File productsDir = new File("D:\\projects\\Myprodject\\db\\products");
@@ -136,7 +144,13 @@ public class Server {
                 BufferedReader readerProduct = new BufferedReader(new FileReader(path));
                 HashMap product = mapper.readValue(readerProduct.readLine(), HashMap.class);
                 Product newProduct = new Product((Integer) product.get("id"), (String) product.get("name"),
-                                     (Double) product.get("price"));
+                        (Double) product.get("price"), (ArrayList) product.get("userBuy"));
+                ArrayList <HashMap> userBuyHash = (ArrayList<HashMap>) product.get("userBuy");
+                for (int j = 0; j <userBuyHash.size() ; j++) {
+                    HashMap <String,Object> userHash = userBuyHash.get(j);
+                    User user = new User(userHash.get("id"),userHash.get("firstName"),userHash.get("lastName"));
+                    newProduct.userBuy.add(user);
+                }
                 products.add(newProduct);
                 readerProduct.close();
             } catch (IOException e) {
@@ -235,14 +249,15 @@ public class Server {
         String response = null;
         try {
             response = mapper.writeValueAsString(usersForResponse);
-        } catch (JsonProcessingException ignored) {}
+        } catch (JsonProcessingException ignored) {
+        }
 
         return new Response("HTTP/1.0 200 OK", response);
     }
 
     public Response cmdListProducts() {
         ObjectMapper mapper = new ObjectMapper();
-        ArrayList <HashMap> productsForResponse = new ArrayList<>();
+        ArrayList<HashMap> productsForResponse = new ArrayList<>();
         for (Product info : products) {
             productsForResponse.add(info.toHashMapProduct());
         }
@@ -251,7 +266,8 @@ public class Server {
         String response = null;
         try {
             response = mapper.writeValueAsString(productsForResponse);
-        } catch (JsonProcessingException ignored) {}
+        } catch (JsonProcessingException ignored) {
+        }
         System.out.println(response);
 
         return new Response("HTTP/1.0 200 OK", response);
