@@ -112,10 +112,41 @@ public class Server {
             HashMap data = mapper.readValue(loadData.readLine(), HashMap.class);
 
             id = (int) data.get("id");
-            ArrayList <User> usersLoad = (ArrayList<User>) data.get("users");
-            users.addAll(usersLoad);
-            ArrayList <Product> productsLoad = (ArrayList<Product>) data.get("products");
-            products.addAll(productsLoad);
+
+            ArrayList<HashMap> usersLoad = (ArrayList<HashMap>) data.get("users");
+            for (int i = 0; i < usersLoad.size(); i++) {
+                HashMap<String, Object> userHashMap = usersLoad.get(i);
+                User newUser = new User((Integer) userHashMap.get("id"), (String) userHashMap.get("firstName"),
+                        (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"));
+
+                if (userHashMap.get("boughtlist") != null) {
+                    ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
+                    for (int j = 0; j < boughtList.size(); j++) {
+                        HashMap<String, Object> productHash = boughtList.get(j);
+                        Product product = new Product((Integer) productHash.get("id"), (String) productHash.get("name"),
+                                (Double) productHash.get("price"));
+                        newUser.boughtList.add(product);
+                    }
+                }
+                users.add(newUser);
+            }
+
+            ArrayList<HashMap> productsLoad = (ArrayList<HashMap>) data.get("products");
+            for (int i = 0; i < productsLoad.size(); i++) {
+                HashMap<String, Object> productHashMap = productsLoad.get(i);
+                Product newProduct = new Product((Integer) productHashMap.get("id"), (String) productHashMap.get("name"),
+                        (Double) productHashMap.get("price"));
+
+                if (productHashMap.get("userBuy") != null) {
+                    ArrayList<HashMap> userBuy = (ArrayList<HashMap>) productHashMap.get("userBuy");
+                    for (int j = 0; j < userBuy.size(); j++) {
+                        HashMap<String, Object> userHash = userBuy.get(j);
+                        User user = new User(userHash.get("id"), userHash.get("firstName"), userHash.get("lastName"));
+                        newProduct.userBuy.add(user);
+                    }
+                }
+                products.add(newProduct);
+            }
 
             loadData.close();
         } catch (IOException e) {
@@ -131,10 +162,10 @@ public class Server {
                     StandardCharsets.UTF_8);
             ObjectMapper mapper = new ObjectMapper();
 
-            HashMap <String, Object> data = new HashMap<>();
+            HashMap<String, Object> data = new HashMap<>();
             data.put("users", users);
             data.put("products", products);
-            data.put("id",id);
+            data.put("id", id);
 
             String save = mapper.writeValueAsString(data);
             saveData.print(save);
