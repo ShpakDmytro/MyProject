@@ -106,96 +106,41 @@ public class Server {
 
     public void cmdLoad() {
         try {
-            BufferedReader readerForId = new BufferedReader(
-                    new FileReader("D:\\projects\\Myprodject\\db\\id"));
-            String idAsString = readerForId.readLine();
-            id = Integer.parseInt(idAsString);
-            readerForId.close();
+            BufferedReader loadData = new BufferedReader(
+                    new FileReader("D:\\projects\\Myprodject\\db\\data.json"));
+            ObjectMapper mapper = new ObjectMapper();
+            HashMap data = mapper.readValue(loadData.readLine(), HashMap.class);
+
+            id = (int) data.get("id");
+            ArrayList <User> usersLoad = (ArrayList<User>) data.get("users");
+            users.addAll(usersLoad);
+            ArrayList <Product> productsLoad = (ArrayList<Product>) data.get("products");
+            products.addAll(productsLoad);
+
+            loadData.close();
         } catch (IOException e) {
-            System.out.println("Error ID load");
+            System.out.println("Error load");
         }
 
-        File actual = new File("D:\\projects\\Myprodject\\db\\users");
-        for (File f : actual.listFiles()) {
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                BufferedReader br = new BufferedReader(new FileReader(f.getAbsolutePath()));
-                HashMap user = mapper.readValue(br.readLine(), HashMap.class);
-                User newUser = new User((Integer) user.get("id"), (String) user.get("firstName"),
-                        (String) user.get("lastName"), (Double) user.get("amount"));
-                ArrayList <HashMap> boughtlist = (ArrayList<HashMap>) user.get("boughtlist");
-                for (int j = 0; j < boughtlist.size(); j++) {
-                    HashMap <String,Object> productHash = boughtlist.get(j);
-                    Product product = new Product((Integer) productHash.get("id"), (String) productHash.get("name"),
-                            (Double) productHash.get("price"));
-                    newUser.boughtList.add(product);
-                }
-                users.add(newUser);
-                br.close();
-            } catch (IOException ignored) {
-            }
-        }
-
-        File productsDir = new File("D:\\projects\\Myprodject\\db\\products");
-        for (int i = 0; i < productsDir.listFiles().length; i++) {
-            String path = productsDir.listFiles()[i].getAbsolutePath();
-            try {
-                ObjectMapper mapper = new ObjectMapper();
-                BufferedReader readerProduct = new BufferedReader(new FileReader(path));
-                HashMap product = mapper.readValue(readerProduct.readLine(), HashMap.class);
-                Product newProduct = new Product((Integer) product.get("id"), (String) product.get("name"),
-                        (Double) product.get("price"), (ArrayList) product.get("userBuy"));
-                ArrayList <HashMap> userBuyHash = (ArrayList<HashMap>) product.get("userBuy");
-                for (int j = 0; j <userBuyHash.size() ; j++) {
-                    HashMap <String,Object> userHash = userBuyHash.get(j);
-                    User user = new User(userHash.get("id"),userHash.get("firstName"),userHash.get("lastName"));
-                    newProduct.userBuy.add(user);
-                }
-                products.add(newProduct);
-                readerProduct.close();
-            } catch (IOException e) {
-                System.out.println("Error product load");
-            }
-        }
     }
 
     public void cmdSave() {
 
         try {
-            PrintWriter saveId = new PrintWriter("D:\\projects\\Myprodject\\db\\id",
+            PrintWriter saveData = new PrintWriter("D:\\projects\\Myprodject\\db\\data.json",
                     StandardCharsets.UTF_8);
-            saveId.println(id);
-            saveId.close();
+            ObjectMapper mapper = new ObjectMapper();
+
+            HashMap <String, Object> data = new HashMap<>();
+            data.put("users", users);
+            data.put("products", products);
+            data.put("id",id);
+
+            String save = mapper.writeValueAsString(data);
+            saveData.print(save);
+            saveData.close();
         } catch (IOException e) {
             System.out.println("Error Save");
-        }
-
-        for (User user : users) {
-            try {
-                PrintWriter writer = new PrintWriter(
-                        "D:\\projects\\Myprodject\\db\\users\\" + user.getId(),
-                        StandardCharsets.UTF_8);
-                ObjectMapper mapper = new ObjectMapper();
-                String save = mapper.writeValueAsString(user.toHashMapUser());
-                writer.print(save);
-                writer.close();
-            } catch (IOException e) {
-                System.out.println("Error saving file");
-            }
-        }
-
-        for (Product product : products) {
-            try {
-                PrintWriter writer = new PrintWriter(
-                        "D:\\projects\\Myprodject\\db\\products\\" + product.getId(),
-                        StandardCharsets.UTF_8);
-                ObjectMapper mapper = new ObjectMapper();
-                String save = mapper.writeValueAsString(product.toHashMapProduct());
-                writer.print(save);
-                writer.close();
-            } catch (IOException e) {
-                System.out.println("Error saving file");
-            }
         }
     }
 
