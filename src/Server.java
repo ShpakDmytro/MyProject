@@ -162,12 +162,22 @@ public class Server {
                     StandardCharsets.UTF_8);
             ObjectMapper mapper = new ObjectMapper();
 
-            HashMap<String, Object> data = new HashMap<>();
-            data.put("users", users);
-            data.put("products", products);
-            data.put("id", id);
+            HashMap<String, Object> dataForSave = new HashMap<>();
+            ArrayList <HashMap> usersForSave = new ArrayList<>();
+            for (int i = 0; i < users.size(); i++) {
+                usersForSave.add(users.get(i).toHashMapUser());
+            }
+            dataForSave.put("users",usersForSave);
 
-            String save = mapper.writeValueAsString(data);
+            ArrayList <HashMap> productsForSave = new ArrayList<>();
+            for (int i = 0; i < products.size(); i++) {
+                productsForSave.add(products.get(i).toHashMapProduct());
+            }
+            dataForSave.put("products",productsForSave);
+
+            dataForSave.put("id", id);
+
+            String save = mapper.writeValueAsString(dataForSave);
             saveData.print(save);
             saveData.close();
         } catch (IOException e) {
