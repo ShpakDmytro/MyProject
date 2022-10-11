@@ -15,12 +15,6 @@ public class Product {
         this.price = price;
         this.userBuy = new ArrayList<>();
     }
-    public Product(int id, String name, double price, ArrayList userBuy) {
-        this.id = id;
-        this.name = name;
-        this.price = price;
-        this.userBuy = new ArrayList<>();
-    }
 
     public void addUser(User user) {
         userBuy.add(user);

@@ -1,5 +1,3 @@
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -36,10 +34,6 @@ public class User {
         return lastName;
     }
 
-    public Double getAmount() {
-        return amount;
-    }
-
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
@@ -49,10 +43,6 @@ public class User {
 
     public ArrayList<Product> getBoughtList() {
         return boughtList;
-    }
-
-    public void addProduct(Product product) {
-        boughtList.add(product);
     }
 
     public HashMap toHashMapUser() {

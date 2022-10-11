@@ -19,7 +19,7 @@ public class Server {
         this.products = new ArrayList<>();
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args){
         new Server().run();
     }
 
@@ -98,7 +98,7 @@ public class Server {
         } else if (objRequest.getEndpoint().equals("GET /product-users")) {
             response = cmdListProductUsers(objRequest);
         } else {
-            response = new Response("HTTP/1.0 404 Not Found", "Unknown command");
+            response = new Response("HTTP/1.0 404 Not Found", "\"Unknown command\"");
         }
         pout.print(response.serialize());
         pout.close();
@@ -119,15 +119,14 @@ public class Server {
                 User newUser = new User((Integer) userHashMap.get("id"), (String) userHashMap.get("firstName"),
                         (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"));
 
-                if (userHashMap.get("boughtlist") != null) {
-                    ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
-                    for (int j = 0; j < boughtList.size(); j++) {
-                        HashMap<String, Object> productHash = boughtList.get(j);
-                        Product product = new Product((Integer) productHash.get("id"), (String) productHash.get("name"),
-                                (Double) productHash.get("price"));
-                        newUser.boughtList.add(product);
-                    }
+                ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
+                for (int j = 0; j < boughtList.size(); j++) {
+                    HashMap<String, Object> productHash = boughtList.get(j);
+                    Product product = new Product((Integer) productHash.get("id"), (String) productHash.get("name"),
+                            (Double) productHash.get("price"));
+                    newUser.boughtList.add(product);
                 }
+
                 users.add(newUser);
             }
 
@@ -137,13 +136,11 @@ public class Server {
                 Product newProduct = new Product((Integer) productHashMap.get("id"), (String) productHashMap.get("name"),
                         (Double) productHashMap.get("price"));
 
-                if (productHashMap.get("userBuy") != null) {
-                    ArrayList<HashMap> userBuy = (ArrayList<HashMap>) productHashMap.get("userBuy");
-                    for (int j = 0; j < userBuy.size(); j++) {
-                        HashMap<String, Object> userHash = userBuy.get(j);
-                        User user = new User(userHash.get("id"), userHash.get("firstName"), userHash.get("lastName"));
-                        newProduct.userBuy.add(user);
-                    }
+                ArrayList<HashMap> userBuy = (ArrayList<HashMap>) productHashMap.get("userBuy");
+                for (int j = 0; j < userBuy.size(); j++) {
+                    HashMap<String, Object> userHash = userBuy.get(j);
+                    User user = new User(userHash.get("id"), userHash.get("firstName"), userHash.get("lastName"));
+                    newProduct.userBuy.add(user);
                 }
                 products.add(newProduct);
             }
@@ -163,17 +160,17 @@ public class Server {
             ObjectMapper mapper = new ObjectMapper();
 
             HashMap<String, Object> dataForSave = new HashMap<>();
-            ArrayList <HashMap> usersForSave = new ArrayList<>();
+            ArrayList<HashMap> usersForSave = new ArrayList<>();
             for (int i = 0; i < users.size(); i++) {
                 usersForSave.add(users.get(i).toHashMapUser());
             }
-            dataForSave.put("users",usersForSave);
+            dataForSave.put("users", usersForSave);
 
-            ArrayList <HashMap> productsForSave = new ArrayList<>();
+            ArrayList<HashMap> productsForSave = new ArrayList<>();
             for (int i = 0; i < products.size(); i++) {
                 productsForSave.add(products.get(i).toHashMapProduct());
             }
-            dataForSave.put("products",productsForSave);
+            dataForSave.put("products", productsForSave);
 
             dataForSave.put("id", id);
 
@@ -186,41 +183,44 @@ public class Server {
     }
 
     public Response cmdNewUser(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
 
-        String firstName = objRequest.body.split(",")[0];
-        String lastName = objRequest.body.split(",")[1];
-        String amountAsString = objRequest.body.split(",")[2];
-
-        double amountAsDouble;
         try {
-            amountAsDouble = Double.parseDouble(amountAsString);
-        } catch (NumberFormatException exception) {
-            return new Response("HTTP/1.0 400 Bad Request", "Wrong amount value");
+            HashMap createUser = mapper.readValue(objRequest.body, HashMap.class);
+            if ((Double) createUser.get("amount") <= 0) {
+                return new Response("HTTP/1.0 400 Bad Request", "\"Wrong amount value\"");
+            }
+            User user = new User(id, (String) createUser.get("firstName"),
+                    (String) createUser.get("lastName"), (Double) createUser.get("amount"));
+
+            users.add(user);
+            id++;
+
+        } catch (JsonProcessingException e) {
+            return new Response("HTTP/1.0 200 OK", "\"Wrong request format\"");
         }
 
-        User user = new User(id, firstName, lastName, amountAsDouble);
-        users.add(user);
-        id++;
-        return new Response("HTTP/1.0 200 OK", "Add user successful");
-
+        return new Response("HTTP/1.0 200 OK", "\"Add user successful\"");
     }
 
     public Response cmdNewProduct(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
 
-        String productName = objRequest.body.split(",")[0];
-        String productPriceAsString = objRequest.body.split(",")[1];
-
-        double productPriceASDouble;
         try {
-            productPriceASDouble = Double.parseDouble(productPriceAsString);
-        } catch (NumberFormatException exception) {
-            return new Response("HTTP/1.0 400 Bad Request", "Wrong amount value");
+            HashMap createProduct = mapper.readValue(objRequest.body, HashMap.class);
+            if ((Double) createProduct.get("price") <= 0) {
+                return new Response("HTTP/1.0 400 Bad Request", "\"Wrong amount value\"");
+            }
+            Product product = new Product(id, (String) createProduct.get("name"), (Double) createProduct.get("price"));
+
+            products.add(product);
+            id++;
+
+        } catch (JsonProcessingException e) {
+            return new Response("HTTP/1.0 200 400 Bad Request", "\"Wrong request format\"");
         }
 
-        Product product = new Product(id, productName, productPriceASDouble);
-        products.add(product);
-        id++;
-        return new Response("HTTP/1.0 200 OK", "Add product successful");
+        return new Response("HTTP/1.0 200 OK", "\"Add product successful\"");
     }
 
     public Response cmdListUsers() {
@@ -259,45 +259,51 @@ public class Server {
         return new Response("HTTP/1.0 200 OK", response);
     }
 
-    public Response cmdBuyProduct(Request objRequest) throws Exception {
+    public Response cmdBuyProduct(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+        int userIdForBuying;
+        int productIdForBuying;
 
-        String idUserAsString = objRequest.body.split(",")[0];
-        int idUserAsInt = Integer.parseInt(idUserAsString);
+        try {
+            HashMap buyingRequest = mapper.readValue(objRequest.body, HashMap.class);
+            userIdForBuying = (int) buyingRequest.get("userId");
+            productIdForBuying = (int) buyingRequest.get("productId");
 
-        String idProductAsString = objRequest.body.split(",")[1];
-        int idProductAsInt = Integer.parseInt(idProductAsString);
+        } catch (JsonProcessingException e) {
+            return new Response("HTTP/1.0 200 400 Bad Request", "\"Wrong request format\"");
+        }
 
         boolean userFound = false;
         User user = null;
         for (User check : users) {
-            if (check.getId() == idUserAsInt) {
+            if (check.getId() == userIdForBuying) {
                 userFound = true;
                 user = check;
             }
         }
 
         if (!userFound) {
-            return new Response("HTTP/1.0 400 Bad Request", "Wrong user id");
+            return new Response("HTTP/1.0 400 Bad Request", "\"Wrong user id\"");
         }
 
         Product product = null;
         boolean productFound = false;
         for (Product check : products) {
-            if (check.getId() == idProductAsInt) {
+            if (check.getId() == productIdForBuying) {
                 productFound = true;
                 product = check;
             }
         }
         if (!productFound) {
-            return new Response("HTTP/1.0 400 Bad Request", "Wrong product id");
+            return new Response("HTTP/1.0 400 Bad Request", "\"Wrong product id\"");
         }
 
         try {
             user.buyProduct(product);
             product.addUser(user);
-            return new Response("HTTP/1.0 200 OK", "You did successful buying");
+            return new Response("HTTP/1.0 200 OK", "\"You did successful buying\"");
         } catch (Exception e) {
-            return new Response("HTTP/1.0 400 Bad Request", "You haven`t enough money");
+            return new Response("HTTP/1.0 400 Bad Request", "\"You haven`t enough money\"");
         }
     }
 
@@ -315,12 +321,12 @@ public class Server {
             }
         }
         if (!rightUser) {
-            return new Response("HTTP/1.0 400 Bad Request", "Wrong user id");
+            return new Response("HTTP/1.0 400 Bad Request", "\"Wrong user id\"");
         }
 
         ArrayList<Product> buying = user.getBoughtList();
         if (buying.size() < 1) {
-            return new Response("HTTP/1.0 200 OK", "You haven`t buying");
+            return new Response("HTTP/1.0 200 OK", "\"You haven`t buying\"");
         } else {
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < buying.size(); i++) {
@@ -358,7 +364,7 @@ public class Server {
             }
             return new Response("HTTP/1.0 200 OK", result.toString());
         } else {
-            return new Response("HTTP/1.0 200 OK", "Product don`t buying");
+            return new Response("HTTP/1.0 200 OK", "\"Product don`t buying\"");
         }
     }
 }
