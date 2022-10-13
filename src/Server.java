@@ -98,7 +98,7 @@ public class Server {
         } else if (objRequest.getEndpoint().equals("GET /product-users")) {
             response = cmdListProductUsers(objRequest);
         } else {
-            response = new UnsuccessfulResponse("Unknown command");
+            response = new UnsuccessfulResponse("404", "Unknown command");
         }
         pout.print(response.serialize());
         pout.close();
@@ -189,7 +189,7 @@ public class Server {
 
             HashMap createUser = mapper.readValue(objRequest.body, HashMap.class);
             if ((Double) createUser.get("amount") <= 0) {
-                return new UnsuccessfulResponse ( "Wrong amount value");
+                return new UnsuccessfulResponse("400", "Wrong amount value");
             }
             User user = new User(id, (String) createUser.get("firstName"),
                     (String) createUser.get("lastName"), (Double) createUser.get("amount"));
@@ -198,10 +198,10 @@ public class Server {
             id++;
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse ( "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
-        return new SuccessfulResponse("Add user successful");
+        return new SuccessfulResponse("200 OK","Add user successful");
     }
 
     public Response cmdNewProduct(Request objRequest) {
@@ -210,7 +210,7 @@ public class Server {
         try {
             HashMap createProduct = mapper.readValue(objRequest.body, HashMap.class);
             if ((Double) createProduct.get("price") <= 0) {
-                return new UnsuccessfulResponse( "Wrong amount value");
+                return new UnsuccessfulResponse("400", "Wrong amount value");
             }
             Product product = new Product(id, (String) createProduct.get("name"), (Double) createProduct.get("price"));
 
@@ -218,10 +218,10 @@ public class Server {
             id++;
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse( "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
-        return new SuccessfulResponse("Add product successful");
+        return new SuccessfulResponse("200 OK","Add product successful");
     }
 
     public Response cmdListUsers() {
@@ -239,7 +239,7 @@ public class Server {
         } catch (JsonProcessingException ignored) {
         }
 
-        return new SuccessfulResponse(response);
+        return new SuccessfulResponse("200 OK",response);
     }
 
     public SuccessfulResponse cmdListProducts() {
@@ -257,7 +257,7 @@ public class Server {
         }
         System.out.println(response);
 
-        return new SuccessfulResponse(response);
+        return new SuccessfulResponse("200 OK",response);
     }
 
     public Response cmdBuyProduct(Request objRequest) {
@@ -271,7 +271,7 @@ public class Server {
             productIdForBuying = (int) buyingRequest.get("productId");
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse( "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad Request","Wrong request format");
         }
 
         boolean userFound = false;
@@ -284,7 +284,7 @@ public class Server {
         }
 
         if (!userFound) {
-            return new UnsuccessfulResponse( "Wrong user id");
+            return new UnsuccessfulResponse("400 Bad Request","Wrong user id");
         }
 
         Product product = null;
@@ -296,15 +296,15 @@ public class Server {
             }
         }
         if (!productFound) {
-            return new UnsuccessfulResponse( "Wrong product id");
+            return new UnsuccessfulResponse("400 Bad Request","Wrong product id");
         }
 
         try {
             user.buyProduct(product);
             product.addUser(user);
-            return new SuccessfulResponse("You did successful buying");
+            return new SuccessfulResponse("200 OK","You did successful buying");
         } catch (Exception e) {
-            return new UnsuccessfulResponse( "You haven`t enough money");
+            return new UnsuccessfulResponse("400 Bad Request","You haven`t enough money");
         }
     }
 
@@ -322,19 +322,19 @@ public class Server {
             }
         }
         if (!rightUser) {
-            return new UnsuccessfulResponse( "Wrong user id");
+            return new UnsuccessfulResponse("400 Bad Request","Wrong user id");
         }
 
         ArrayList<Product> buying = user.getBoughtList();
         if (buying.size() < 1) {
-            return new UnsuccessfulResponse("You haven`t buying");
+            return new UnsuccessfulResponse("400 Bad Request","You haven`t buying");
         } else {
             StringBuilder result = new StringBuilder();
             for (int i = 0; i < buying.size(); i++) {
                 Product buy = buying.get(i);
                 result.append(i).append(": ").append(buy.getName()).append("\n");
             }
-            return new SuccessfulResponse(result.toString());
+            return new SuccessfulResponse("200 OK",result.toString());
         }
     }
 
@@ -363,9 +363,9 @@ public class Server {
                 } catch (Exception ignored) {
                 }
             }
-            return new SuccessfulResponse(result.toString());
+            return new SuccessfulResponse("200 OK", result.toString());
         } else {
-            return new UnsuccessfulResponse( "Product don`t buying");
+            return new SuccessfulResponse("200 OK","Product don`t buying");
         }
     }
 }

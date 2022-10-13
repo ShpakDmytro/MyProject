@@ -2,8 +2,8 @@ public class SuccessfulResponse implements Response {
     String status;
     String bodyResponse;
 
-    public SuccessfulResponse( String bodyResponse) {
-        this.status = "HTTP/1.0 200 OK";
+    public SuccessfulResponse(String status, String bodyResponse) {
+        this.status = "HTTP/1.0" + status;
         this.bodyResponse = "{\"message\":\"" + bodyResponse +"\"}";
     }
 
