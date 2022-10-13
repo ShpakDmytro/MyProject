@@ -2,7 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class User {
-   int id;
+    int id;
     String firstName;
     String lastName;
     double amount;
@@ -47,21 +47,21 @@ public class User {
 
     public HashMap toHashMapUser() {
 
-        HashMap<String,Object> user = new HashMap<>();
-        user.put("id",this.id);
-        user.put("firstName",this.firstName);
-        user.put("lastName",this.lastName);
-        user.put("amount",this.amount);
+        HashMap<String, Object> user = new HashMap<>();
+        user.put("id", this.id);
+        user.put("firstName", this.firstName);
+        user.put("lastName", this.lastName);
+        user.put("amount", this.amount);
         ArrayList<HashMap> boughtUserList = new ArrayList<>();
         for (int i = 0; i < this.boughtList.size(); i++) {
             Product info = this.boughtList.get(i);
-            HashMap<String,Object> product = new HashMap<>();
-            product.put("id",info.getId());
-            product.put("name",info.getName());
-            product.put("price",info.getPrice());
+            HashMap<String, Object> product = new HashMap<>();
+            product.put("id", info.getId());
+            product.put("name", info.getName());
+            product.put("price", info.getPrice());
             boughtUserList.add(product);
         }
-        user.put("boughtlist",boughtUserList);
+        user.put("boughtlist", boughtUserList);
 
         return user;
     }
