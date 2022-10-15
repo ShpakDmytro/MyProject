@@ -9,6 +9,6 @@ public class UnsuccessfulResponse implements Response {
 
     public String serialize() {
         return this.status + "\r\n" + "Content-length: " + this.bodyResponse.length() + "\r\n" +
-                "\r\n" + this.bodyResponse;
+                "Content-type: application/json"+ "\r\n" + "\r\n" + this.bodyResponse;
     }
 }

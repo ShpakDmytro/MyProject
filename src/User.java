@@ -6,14 +6,24 @@ public class User {
     String firstName;
     String lastName;
     double amount;
+
+    String login;
+
+    String password;
+
+    String accessToken;
     ArrayList<Product> boughtList;
 
-    public User(int id, String firstName, String lastName, double amount) {
+    public User(int id, String firstName, String lastName, double amount,
+                String login, String password) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
         this.amount = amount;
         this.boughtList = new ArrayList<>();
+        this.login = login;
+        this.password = password;
+        this.accessToken = null;
     }
 
     public User(Object id, Object firstName, Object lastName) {
@@ -62,6 +72,9 @@ public class User {
             boughtUserList.add(product);
         }
         user.put("boughtlist", boughtUserList);
+        user.put("login",this.login);
+        user.put("password",this.password);
+        user.put("accessToken",this.accessToken);
 
         return user;
     }

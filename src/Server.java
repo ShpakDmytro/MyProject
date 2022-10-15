@@ -80,8 +80,11 @@ public class Server {
     private void programLogic(Request objRequest, PrintStream pout) {
         Response response = null;
 
-        if (objRequest.getEndpoint().equals("POST /user")) {
-            response = cmdNewUser(objRequest);
+        if (objRequest.getEndpoint().equals("POST /sign-up")) {
+            response = cmdSignUp(objRequest);
+            cmdSave();
+        } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
+            response = cmdSignIn(objRequest);
             cmdSave();
         } else if (objRequest.getEndpoint().equals("POST /product")) {
             response = cmdNewProduct(objRequest);
@@ -101,6 +104,7 @@ public class Server {
             response = new UnsuccessfulResponse("404", "Unknown command");
         }
         pout.print(response.serialize());
+        System.out.println(response.serialize());
         pout.close();
     }
 
@@ -117,7 +121,8 @@ public class Server {
             for (int i = 0; i < usersLoad.size(); i++) {
                 HashMap<String, Object> userHashMap = usersLoad.get(i);
                 User newUser = new User((Integer) userHashMap.get("id"), (String) userHashMap.get("firstName"),
-                        (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"));
+                        (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"),
+                        (String) userHashMap.get("login"), (String) userHashMap.get("password"));
 
                 ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
                 for (int j = 0; j < boughtList.size(); j++) {
@@ -126,6 +131,8 @@ public class Server {
                             (Double) productHash.get("price"));
                     newUser.boughtList.add(product);
                 }
+
+                newUser.accessToken = (String) userHashMap.get("accessToken");
 
                 users.add(newUser);
             }
@@ -182,18 +189,17 @@ public class Server {
         }
     }
 
-    public Response cmdNewUser(Request objRequest) {
+    public Response cmdSignUp(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-
             HashMap createUser = mapper.readValue(objRequest.body, HashMap.class);
             if ((Double) createUser.get("amount") <= 0) {
                 return new UnsuccessfulResponse("400", "Wrong amount value");
             }
             User user = new User(id, (String) createUser.get("firstName"),
-                    (String) createUser.get("lastName"), (Double) createUser.get("amount"));
-
+                    (String) createUser.get("lastName"), (Double) createUser.get("amount"),
+                    (String) createUser.get("login"), (String) createUser.get("password"));
             users.add(user);
             id++;
 
@@ -201,7 +207,29 @@ public class Server {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
-        return new SuccessfulResponse("200 OK","Add user successful");
+        return new SuccessfulResponse("200 OK", "Successful add new user");
+    }
+    private Response cmdSignIn(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+        String accessToken = new TokenGenerator().generateToken();
+        try {
+            HashMap createToken = mapper.readValue(objRequest.body, HashMap.class);
+            String login = (String) createToken.get("login");
+            String password = (String) createToken.get("password");
+
+            for (int i = 0; i < users.size() ; i++) {
+                User user = users.get(i);
+                if (user.login.equals(login) && user.password.equals(password)){
+                    user.accessToken = accessToken;
+                    return  new SuccessfulResponseSignUp("200 OK",accessToken);
+                }
+            }
+
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        }
+
+        return new UnsuccessfulResponse("400 Bad Request","No user found");
     }
 
     public Response cmdNewProduct(Request objRequest) {
@@ -236,8 +264,7 @@ public class Server {
         String response = null;
         try {
             response = mapper.writeValueAsString(usersForResponse);
-        } catch (JsonProcessingException ignored) {
-        }
+        } catch (JsonProcessingException ignored) {}
 
         return new SuccessfulResponse("200 OK",response);
     }
