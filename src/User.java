@@ -6,11 +6,8 @@ public class User {
     String firstName;
     String lastName;
     double amount;
-
     String login;
-
     String password;
-
     String accessToken;
     ArrayList<Product> boughtList;
 
@@ -24,6 +21,18 @@ public class User {
         this.login = login;
         this.password = password;
         this.accessToken = null;
+    }
+
+    public User(int id, String firstName, String lastName, double amount,
+                String login, String password, String accessToken) {
+        this.id = id;
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.amount = amount;
+        this.boughtList = new ArrayList<>();
+        this.login = login;
+        this.password = password;
+        this.accessToken = accessToken;
     }
 
     public User(Object id, Object firstName, Object lastName) {
@@ -55,6 +64,25 @@ public class User {
         return boughtList;
     }
 
+    boolean checkLoginPassword(String login, String password, String loginFromUser, String passwordFromUser) {
+        if (login.equals(loginFromUser) && password.equals(passwordFromUser)) {
+            return true;
+        }
+        return false;
+    }
+
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setAccessToken(String accessToken) {
+        this.accessToken = accessToken;
+    }
+
     public HashMap toHashMapUser() {
 
         HashMap<String, Object> user = new HashMap<>();
@@ -72,9 +100,9 @@ public class User {
             boughtUserList.add(product);
         }
         user.put("boughtlist", boughtUserList);
-        user.put("login",this.login);
-        user.put("password",this.password);
-        user.put("accessToken",this.accessToken);
+        user.put("login", this.login);
+        user.put("password", this.password);
+        user.put("accessToken", this.accessToken);
 
         return user;
     }

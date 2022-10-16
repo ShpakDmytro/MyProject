@@ -1,13 +1,13 @@
 
 
-public class SuccessfulResponseSignUp implements Response {
+public class SuccessfulResponseSignIn implements Response {
 
     String status;
     String bodyResponse;
     String accessToken;
 
-    public SuccessfulResponseSignUp(String status, String accessToken) {
-        this.status = "HTTP/1.0 " + status;
+    public SuccessfulResponseSignIn(String accessToken) {
+        this.status = "HTTP/1.0 200 OK ";
         this.accessToken = accessToken;
         this.bodyResponse = "{\"accessToken\":\"" + this.accessToken + "\"}";
     }

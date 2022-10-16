@@ -122,7 +122,8 @@ public class Server {
                 HashMap<String, Object> userHashMap = usersLoad.get(i);
                 User newUser = new User((Integer) userHashMap.get("id"), (String) userHashMap.get("firstName"),
                         (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"),
-                        (String) userHashMap.get("login"), (String) userHashMap.get("password"));
+                        (String) userHashMap.get("login"), (String) userHashMap.get("password"),
+                        (String) userHashMap.get("accessToken"));
 
                 ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
                 for (int j = 0; j < boughtList.size(); j++) {
@@ -131,8 +132,6 @@ public class Server {
                             (Double) productHash.get("price"));
                     newUser.boughtList.add(product);
                 }
-
-                newUser.accessToken = (String) userHashMap.get("accessToken");
 
                 users.add(newUser);
             }
@@ -154,6 +153,7 @@ public class Server {
 
             loadData.close();
         } catch (IOException e) {
+            System.out.println(e);
             System.out.println("Error load");
         }
 
@@ -185,6 +185,7 @@ public class Server {
             saveData.print(save);
             saveData.close();
         } catch (IOException e) {
+            System.out.println(e);
             System.out.println("Error Save");
         }
     }
@@ -193,13 +194,22 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap createUser = mapper.readValue(objRequest.body, HashMap.class);
-            if ((Double) createUser.get("amount") <= 0) {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            if ((Double) requestBody.get("amount") <= 0) {
                 return new UnsuccessfulResponse("400", "Wrong amount value");
             }
-            User user = new User(id, (String) createUser.get("firstName"),
-                    (String) createUser.get("lastName"), (Double) createUser.get("amount"),
-                    (String) createUser.get("login"), (String) createUser.get("password"));
+            String login = (String) requestBody.get("login");
+            String password = (String) requestBody.get("password");
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                if (user.checkLoginPassword(user.getLogin(), user.getPassword(),login,password)) {
+                    return new UnsuccessfulResponse("400 Bad Request","This user already exists");
+                }
+            }
+
+            User user = new User(id, (String) requestBody.get("firstName"),
+                    (String) requestBody.get("lastName"), (Double) requestBody.get("amount"),
+                    (String) requestBody.get("login"), (String) requestBody.get("password"));
             users.add(user);
             id++;
 
@@ -211,17 +221,18 @@ public class Server {
     }
     private Response cmdSignIn(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
-        String accessToken = new TokenGenerator().generateToken();
-        try {
-            HashMap createToken = mapper.readValue(objRequest.body, HashMap.class);
-            String login = (String) createToken.get("login");
-            String password = (String) createToken.get("password");
 
-            for (int i = 0; i < users.size() ; i++) {
+        try {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            String login = (String) requestBody.get("login");
+            String password = (String) requestBody.get("password");
+
+            for (int i = 0; i < users.size(); i++) {
                 User user = users.get(i);
-                if (user.login.equals(login) && user.password.equals(password)){
-                    user.accessToken = accessToken;
-                    return  new SuccessfulResponseSignUp("200 OK",accessToken);
+                if (user.checkLoginPassword(user.getLogin(), user.getPassword(),login,password)) {
+                    String accessToken = new TokenGenerator().generateToken();
+                    user.setAccessToken(accessToken);
+                    return new SuccessfulResponseSignIn(accessToken);
                 }
             }
 
