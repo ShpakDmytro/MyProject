@@ -7,7 +7,7 @@ public class SuccessfulResponseSignIn implements Response {
     String accessToken;
 
     public SuccessfulResponseSignIn(String accessToken) {
-        this.status = "HTTP/1.0 200 OK ";
+        this.status = "HTTP/1.0 200 OK";
         this.accessToken = accessToken;
         this.bodyResponse = "{\"accessToken\":\"" + this.accessToken + "\"}";
     }

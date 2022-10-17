@@ -64,19 +64,21 @@ public class User {
         return boughtList;
     }
 
-    boolean checkLoginPassword(String login, String password, String loginFromUser, String passwordFromUser) {
+    boolean checkLoginPassword(String loginFromUser, String passwordFromUser) {
         if (login.equals(loginFromUser) && password.equals(passwordFromUser)) {
             return true;
         }
         return false;
     }
 
-    public String getLogin() {
-        return login;
+    boolean checkLogin(String loginFromUser) {
+        return login.equals(loginFromUser);
     }
-
-    public String getPassword() {
-        return password;
+    boolean checkAccessToken(String accessTokenFromRequest) {
+        if (accessToken == null){
+            return false;
+        }
+        return accessToken.equals(accessTokenFromRequest);
     }
 
     public void setAccessToken(String accessToken) {

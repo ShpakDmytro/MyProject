@@ -86,6 +86,9 @@ public class Server {
         } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
             response = cmdSignIn(objRequest);
             cmdSave();
+        } else if (objRequest.getEndpoint().equals("POST /sign-out")) {
+            response = cmdSignOut(objRequest);
+            cmdSave();
         } else if (objRequest.getEndpoint().equals("POST /product")) {
             response = cmdNewProduct(objRequest);
             cmdSave();
@@ -106,6 +109,27 @@ public class Server {
         pout.print(response.serialize());
         System.out.println(response.serialize());
         pout.close();
+    }
+
+    private Response cmdSignOut(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+
+            for (int i = 0; i < users.size(); i++) {
+                User user = users.get(i);
+                if (user.checkAccessToken((String) requestBody.get("accessToken"))) {
+                    user.setAccessToken(null);
+                    return new SuccessfulResponse("200 OK","The exit has been successfully completed");
+                }
+            }
+
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        }
+
+        return new UnsuccessfulResponse("400 Bad Request","No user found");
     }
 
     public void cmdLoad() {
@@ -198,12 +222,11 @@ public class Server {
             if ((Double) requestBody.get("amount") <= 0) {
                 return new UnsuccessfulResponse("400", "Wrong amount value");
             }
-            String login = (String) requestBody.get("login");
-            String password = (String) requestBody.get("password");
+
             for (int i = 0; i < users.size(); i++) {
                 User user = users.get(i);
-                if (user.checkLoginPassword(user.getLogin(), user.getPassword(),login,password)) {
-                    return new UnsuccessfulResponse("400 Bad Request","This user already exists");
+                if (user.checkLogin((String) requestBody.get("login"))) {
+                    return new UnsuccessfulResponse("400 Bad Request","This login already exists");
                 }
             }
 
@@ -229,7 +252,7 @@ public class Server {
 
             for (int i = 0; i < users.size(); i++) {
                 User user = users.get(i);
-                if (user.checkLoginPassword(user.getLogin(), user.getPassword(),login,password)) {
+                if (user.checkLoginPassword(login,password)) {
                     String accessToken = new TokenGenerator().generateToken();
                     user.setAccessToken(accessToken);
                     return new SuccessfulResponseSignIn(accessToken);
@@ -280,20 +303,17 @@ public class Server {
         return new SuccessfulResponse("200 OK",response);
     }
 
-    public SuccessfulResponse cmdListProducts() {
+    public Response cmdListProducts() {
         ObjectMapper mapper = new ObjectMapper();
         ArrayList<HashMap> productsForResponse = new ArrayList<>();
         for (Product info : products) {
             productsForResponse.add(info.toHashMapProduct());
         }
-        System.out.println(products);
-        System.out.println(productsForResponse);
         String response = null;
         try {
             response = mapper.writeValueAsString(productsForResponse);
         } catch (JsonProcessingException ignored) {
         }
-        System.out.println(response);
 
         return new SuccessfulResponse("200 OK",response);
     }
