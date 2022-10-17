@@ -220,7 +220,7 @@ public class Server {
         try {
             HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
             if ((Double) requestBody.get("amount") <= 0) {
-                return new UnsuccessfulResponse("400", "Wrong amount value");
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong amount value");
             }
 
             for (int i = 0; i < users.size(); i++) {
