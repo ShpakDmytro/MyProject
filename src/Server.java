@@ -104,7 +104,7 @@ public class Server {
         } else if (objRequest.getEndpoint().equals("GET /product-users")) {
             response = cmdListProductUsers(objRequest);
         } else {
-            response = new UnsuccessfulResponse("404", "Unknown command");
+            response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
         }
         pout.print(response.serialize());
         System.out.println(response.serialize());
