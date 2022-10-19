@@ -53,6 +53,18 @@ public class User {
         return lastName;
     }
 
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getAccessToken(){
+        return accessToken;
+    }
+
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();

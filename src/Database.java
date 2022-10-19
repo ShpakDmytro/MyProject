@@ -105,7 +105,7 @@ public class Database {
     boolean existsUserByLogin(String loginFromUser){
         for (int i = 0; i < users.size() ; i++) {
             User user = users.get(i);
-            if (user.login.equals(loginFromUser)){
+            if (user.getLogin().equals(loginFromUser)){
                 return true;
             }
         }
@@ -126,58 +126,57 @@ public class Database {
     User findUserByLoginAndPassword(String login, String password) {
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
-            if (user.login.equals(login) && user.password.equals(password)) {
+            if (user.getLogin().equals(login) && user.getPassword().equals(password)) {
                 return user;
             }
         }
         return null;
     }
 
-    User findUserByAccessToken(String AccessTokenFromUser) {
+    User findUserByAccessToken(String accessToken) {
         for (int i = 0; i < users.size(); i++) {
             User user = users.get(i);
             if (user.accessToken == null){continue;}
-            if (user.accessToken.equals(AccessTokenFromUser)) {
-                System.out.println(user.accessToken);
+            if (user.getAccessToken().equals(accessToken)) {
                 return user;
             }
         }
         return null;
     }
 
-    User findUserById(int idFromUser){
+    User findUserById(int id){
         for (int i = 0; i < users.size() ; i++) {
             User user = users.get(i);
-            if (user.getId() == idFromUser){
+            if (user.getId() == id){
                 return user;
             }
         }
         return null;
     }
 
-    Product findProductById(int idFromUser){
+    Product findProductById(int id){
         for (int i = 0; i < products.size() ; i++) {
             Product product = products.get(i);
-            if (product.getId() == idFromUser){
+            if (product.getId() == id){
                 return product;
             }
         }
         return null;
     }
 
-    ArrayList<HashMap> getAllUser(){
-        ArrayList<HashMap> usersForResponse = new ArrayList<>();
+    ArrayList<User> getAllUser(){
+        ArrayList<User> usersForResponse = new ArrayList<>();
 
         for (User user : users) {
-            usersForResponse.add(user.toHashMapUser());
+            usersForResponse.add(user);
         }
         return usersForResponse;
     }
 
-    ArrayList <HashMap> getAllProduct(){
-        ArrayList<HashMap> productsForResponse = new ArrayList<>();
-        for (Product info : products) {
-            productsForResponse.add(info.toHashMapProduct());
+    ArrayList <Product> getAllProduct(){
+        ArrayList<Product> productsForResponse = new ArrayList<>();
+        for (Product product : products) {
+            productsForResponse.add(product);
         }
         return productsForResponse;
     }

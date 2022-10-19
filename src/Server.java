@@ -199,7 +199,12 @@ public class Server {
 
         String response = null;
         try {
-            response = mapper.writeValueAsString(database.getAllUser());
+            ArrayList <User> allUsers = database.getAllUser();
+            ArrayList <HashMap> allUsersForResponse = new ArrayList<>();
+            for (User user : allUsers) {
+                allUsersForResponse.add(user.toHashMapUser());
+            }
+            response = mapper.writeValueAsString(allUsersForResponse);
         } catch (JsonProcessingException ignored) {
         }
 
@@ -211,7 +216,12 @@ public class Server {
 
         String response = null;
         try {
-            response = mapper.writeValueAsString(database.getAllProduct());
+            ArrayList <Product> allProduct = database.getAllProduct();
+            ArrayList <HashMap> allProductForResponse = new ArrayList<>();
+            for (Product product : allProduct){
+                allProductForResponse.add(product.toHashMapProduct());
+            }
+            response = mapper.writeValueAsString(allProductForResponse);
         } catch (JsonProcessingException ignored) {
         }
 
