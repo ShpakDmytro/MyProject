@@ -53,6 +53,18 @@ public class User {
         return lastName;
     }
 
+    public String getLogin() {
+        return login;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public String getAccessToken(){
+        return accessToken;
+    }
+
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
@@ -62,23 +74,6 @@ public class User {
 
     public ArrayList<Product> getBoughtList() {
         return boughtList;
-    }
-
-    boolean checkLoginPassword(String loginFromUser, String passwordFromUser) {
-        if (login.equals(loginFromUser) && password.equals(passwordFromUser)) {
-            return true;
-        }
-        return false;
-    }
-
-    boolean checkLogin(String loginFromUser) {
-        return login.equals(loginFromUser);
-    }
-    boolean checkAccessToken(String accessTokenFromRequest) {
-        if (accessToken == null){
-            return false;
-        }
-        return accessToken.equals(accessTokenFromRequest);
     }
 
     public void setAccessToken(String accessToken) {
