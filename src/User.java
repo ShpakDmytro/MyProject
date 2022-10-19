@@ -64,23 +64,6 @@ public class User {
         return boughtList;
     }
 
-    boolean checkLoginPassword(String loginFromUser, String passwordFromUser) {
-        if (login.equals(loginFromUser) && password.equals(passwordFromUser)) {
-            return true;
-        }
-        return false;
-    }
-
-    boolean checkLogin(String loginFromUser) {
-        return login.equals(loginFromUser);
-    }
-    boolean checkAccessToken(String accessTokenFromRequest) {
-        if (accessToken == null){
-            return false;
-        }
-        return accessToken.equals(accessTokenFromRequest);
-    }
-
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
