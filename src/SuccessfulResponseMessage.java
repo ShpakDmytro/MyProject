@@ -1,8 +1,8 @@
-public class SuccessfulResponse implements Response {
+public class SuccessfulResponseMessage implements Response {
     String status;
     String bodyResponse;
 
-    public SuccessfulResponse(String status, String bodyResponse) {
+    public SuccessfulResponseMessage(String status, String bodyResponse) {
         this.status = "HTTP/1.0 " + status;
         this.bodyResponse = "{\"message\":\"" + bodyResponse +"\"}";
     }

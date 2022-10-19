@@ -130,7 +130,7 @@ public class Server {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
-        return new SuccessfulResponse("200 OK", "Successful add new user");
+        return new SuccessfulResponseMessage("200 OK", "Successful add new user");
     }
 
     private Response cmdSignIn(Request objRequest) {
@@ -165,7 +165,7 @@ public class Server {
             System.out.println((String) requestBody.get("accessToken"));
             if (user != null) {
                 user.setAccessToken(null);
-                return new SuccessfulResponse("200 OK", "The exit has been successfully completed");
+                return new SuccessfulResponseMessage("200 OK", "The exit has been successfully completed");
             }
 
         } catch (JsonProcessingException e) {
@@ -191,41 +191,29 @@ public class Server {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
-        return new SuccessfulResponse("200 OK", "Add product successful");
+        return new SuccessfulResponseMessage("200 OK", "Add product successful");
     }
 
     public Response cmdListUsers() {
-        ObjectMapper mapper = new ObjectMapper();
 
-        String response = null;
-        try {
-            ArrayList <User> allUsers = database.getAllUser();
-            ArrayList <HashMap> allUsersForResponse = new ArrayList<>();
-            for (User user : allUsers) {
-                allUsersForResponse.add(user.toHashMapUser());
-            }
-            response = mapper.writeValueAsString(allUsersForResponse);
-        } catch (JsonProcessingException ignored) {
+        ArrayList<User> allUsers = database.getAllUser();
+        ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
+        for (User user : allUsers) {
+            allUsersForResponse.add(user.toHashMapUser());
         }
 
-        return new SuccessfulResponse("200 OK", response);
+        return new SuccessfulResponseArray("200 OK", allUsersForResponse);
     }
 
     public Response cmdListProducts() {
-        ObjectMapper mapper = new ObjectMapper();
 
-        String response = null;
-        try {
-            ArrayList <Product> allProduct = database.getAllProduct();
-            ArrayList <HashMap> allProductForResponse = new ArrayList<>();
-            for (Product product : allProduct){
-                allProductForResponse.add(product.toHashMapProduct());
-            }
-            response = mapper.writeValueAsString(allProductForResponse);
-        } catch (JsonProcessingException ignored) {
+        ArrayList<Product> allProduct = database.getAllProduct();
+        ArrayList<HashMap> allProductForResponse = new ArrayList<>();
+        for (Product product : allProduct) {
+            allProductForResponse.add(product.toHashMapProduct());
         }
 
-        return new SuccessfulResponse("200 OK", response);
+        return new SuccessfulResponseArray("200 OK", allProductForResponse);
     }
 
     public Response cmdBuyProduct(Request objRequest) {
@@ -255,7 +243,7 @@ public class Server {
         try {
             user.buyProduct(product);
             product.addUser(user);
-            return new SuccessfulResponse("200 OK", "You did successful buying");
+            return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");
         }
@@ -266,22 +254,14 @@ public class Server {
         int number = Integer.parseInt(objRequest.body.split(",")[0]);
 
         User user = database.findUserById(number);
-
         if (user == null) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
         }
 
-        ArrayList<Product> buying = user.getBoughtList();
-        if (buying.size() < 1) {
-            return new UnsuccessfulResponse("400 Bad Request", "You haven`t buying");
-        } else {
-            StringBuilder result = new StringBuilder();
-            for (int i = 0; i < buying.size(); i++) {
-                Product buy = buying.get(i);
-                result.append(i).append(": ").append(buy.getName()).append("\n");
-            }
-            return new SuccessfulResponse("200 OK", result.toString());
-        }
+        HashMap currentUser = user.toHashMapUser();
+        ArrayList <HashMap> boughtListForResponse = (ArrayList<HashMap>) currentUser.get("boughtlist");
+
+        return new SuccessfulResponseArray("200 OK",boughtListForResponse);
     }
 
     public Response cmdListProductUsers(Request objRequest) {
@@ -292,20 +272,11 @@ public class Server {
         Product product = database.findProductById(checkProductAsInt);
 
         if (product != null) {
-            StringBuilder result = new StringBuilder();
-            for (int j = 0; j < product.howManyUsers(); j++) {
-                User user = null;
-                try {
-                    user = product.getUserAtIndex(j);
-                    result.append(j).append(": ");
-                    result.append(user.getFirstName()).append(" ").append(user.getLastName());
-                    result.append("\n");
-                } catch (Exception ignored) {
-                }
-            }
-            return new SuccessfulResponse("200 OK", result.toString());
+            HashMap currentProduct = product.toHashMapProduct();
+            ArrayList <HashMap> userBuyForResponse = (ArrayList<HashMap>) currentProduct.get("userBuy");
+            return new SuccessfulResponseArray("200 OK", userBuyForResponse);
         } else {
-            return new SuccessfulResponse("200 OK", "Product don`t buying");
+            return new SuccessfulResponseMessage("200 OK", "Product don`t buying");
         }
     }
 }
