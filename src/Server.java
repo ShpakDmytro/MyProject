@@ -80,6 +80,9 @@ public class Server {
         if (objRequest.getEndpoint().equals("POST /sign-up")) {
             response = cmdSignUp(objRequest);
             database.saveData();
+        } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")){
+            response = cmdFinishSignUp(objRequest);
+            database.saveData();
         } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
             response = cmdSignIn(objRequest);
             database.saveData();
@@ -124,13 +127,43 @@ public class Server {
             User user = new User(database.nextId(), (String) requestBody.get("firstName"),
                     (String) requestBody.get("lastName"), (Double) requestBody.get("amount"),
                     (String) requestBody.get("login"), (String) requestBody.get("password"));
+            user.confirmationCode = new ConfirmationCodeGenerator().generateConfirmationCode();
+
             database.addUser(user);
+
+            //method send e-mail
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Successful add new user");
+    }
+    private Response cmdFinishSignUp(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+
+        try {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            User user = database.findUserById((Integer) requestBody.get("userId"));
+
+            if (user != null){
+                System.out.println(user.toHashMapUser());
+                if (user.getStatus().equals("confirmed")){
+                    return new UnsuccessfulResponse("400 Bad Request","User already confirmed");
+                }
+                if (user.getConfirmationCode().equals(requestBody.get("confirmationCode"))){
+                    user.setConfirmationCode();
+                    user.setStatus();
+                    return new SuccessfulResponseMessage("200 OK", "Successful confirmed user");
+                } else {
+                    return new UnsuccessfulResponse("400 Bad Request","Wrong confirmed code");
+                }
+            }
+
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        }
+        return new UnsuccessfulResponse("404 Not Found","User not found");
     }
 
     private Response cmdSignIn(Request objRequest) {

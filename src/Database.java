@@ -34,7 +34,8 @@ public class Database {
                 User newUser = new User((Integer) userHashMap.get("id"), (String) userHashMap.get("firstName"),
                         (String) userHashMap.get("lastName"), (Double) userHashMap.get("amount"),
                         (String) userHashMap.get("login"), (String) userHashMap.get("password"),
-                        (String) userHashMap.get("accessToken"));
+                        (String) userHashMap.get("accessToken"), (String) userHashMap.get("status"),
+                        (String) userHashMap.get("confirmationCode"));
 
                 ArrayList<HashMap> boughtList = (ArrayList<HashMap>) userHashMap.get("boughtlist");
                 for (int j = 0; j < boughtList.size(); j++) {
@@ -180,4 +181,5 @@ public class Database {
         }
         return productsForResponse;
     }
+
 }

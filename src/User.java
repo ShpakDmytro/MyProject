@@ -10,6 +10,8 @@ public class User {
     String password;
     String accessToken;
     ArrayList<Product> boughtList;
+    String status;
+    String confirmationCode;
 
     public User(int id, String firstName, String lastName, double amount,
                 String login, String password) {
@@ -21,10 +23,12 @@ public class User {
         this.login = login;
         this.password = password;
         this.accessToken = null;
+        this.status = "unconfirmed";
+        this.confirmationCode = null;
     }
 
     public User(int id, String firstName, String lastName, double amount,
-                String login, String password, String accessToken) {
+                String login, String password, String accessToken, String status, String confirmationCode) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -33,6 +37,8 @@ public class User {
         this.login = login;
         this.password = password;
         this.accessToken = accessToken;
+        this.status = status;
+        this.confirmationCode = confirmationCode;
     }
 
     public User(Object id, Object firstName, Object lastName) {
@@ -72,14 +78,24 @@ public class User {
         } else throw new Exception("You haven`t enough money");
     }
 
-    public ArrayList<Product> getBoughtList() {
-        return boughtList;
+    String getConfirmationCode(){
+        return confirmationCode;
+    }
+
+    String getStatus(){
+        return status;
     }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
 
+    public void setStatus (){
+        status = "confirmed";
+    }
+    public void setConfirmationCode(){
+        confirmationCode = null;
+    }
     public HashMap toHashMapUser() {
 
         HashMap<String, Object> user = new HashMap<>();
@@ -100,6 +116,8 @@ public class User {
         user.put("login", this.login);
         user.put("password", this.password);
         user.put("accessToken", this.accessToken);
+        user.put("status",this.status);
+        user.put("confirmationCode",this.confirmationCode);
 
         return user;
     }
