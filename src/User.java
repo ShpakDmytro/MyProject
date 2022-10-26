@@ -12,7 +12,7 @@ public class User {
     ArrayList<Product> boughtList;
     String status;
     String confirmationCode;
-
+    //create User
     public User(int id, String firstName, String lastName, double amount,
                 String login, String password) {
         this.id = id;
@@ -24,9 +24,9 @@ public class User {
         this.password = password;
         this.accessToken = null;
         this.status = "unconfirmed";
-        this.confirmationCode = null;
+        this.confirmationCode = new ConfirmationCodeGenerator().generateConfirmationCode();
     }
-
+    //load User from bd
     public User(int id, String firstName, String lastName, double amount,
                 String login, String password, String accessToken, String status, String confirmationCode) {
         this.id = id;
@@ -40,7 +40,7 @@ public class User {
         this.status = status;
         this.confirmationCode = confirmationCode;
     }
-
+    //add user to product buyer list
     public User(Object id, Object firstName, Object lastName) {
         this.id = (int) id;
         this.firstName = (String) firstName;
@@ -67,10 +67,13 @@ public class User {
         return password;
     }
 
-    public String getAccessToken(){
+    public String getAccessToken() {
         return accessToken;
     }
 
+    public String getConfirmationCode(){
+        return confirmationCode;
+    }
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
@@ -78,24 +81,32 @@ public class User {
         } else throw new Exception("You haven`t enough money");
     }
 
-    String getConfirmationCode(){
-        return confirmationCode;
+    boolean compareConfirmationCode(String code) {
+        if (confirmationCode == null) {
+            return false;
+        }
+        if (confirmationCode.equals(code)) {
+            return true;
+        }
+        return false;
     }
 
-    String getStatus(){
-        return status;
+    boolean isConfirmed() {
+        if (status.equals("confirmed")) {
+            return true;
+        }
+        return false;
     }
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
 
-    public void setStatus (){
+    public void setStatusConfirmed() {
+        confirmationCode = null;
         status = "confirmed";
     }
-    public void setConfirmationCode(){
-        confirmationCode = null;
-    }
+
     public HashMap toHashMapUser() {
 
         HashMap<String, Object> user = new HashMap<>();
@@ -116,8 +127,8 @@ public class User {
         user.put("login", this.login);
         user.put("password", this.password);
         user.put("accessToken", this.accessToken);
-        user.put("status",this.status);
-        user.put("confirmationCode",this.confirmationCode);
+        user.put("status", this.status);
+        user.put("confirmationCode", this.confirmationCode);
 
         return user;
     }

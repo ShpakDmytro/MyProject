@@ -127,11 +127,11 @@ public class Server {
             User user = new User(database.nextId(), (String) requestBody.get("firstName"),
                     (String) requestBody.get("lastName"), (Double) requestBody.get("amount"),
                     (String) requestBody.get("login"), (String) requestBody.get("password"));
-            user.confirmationCode = new ConfirmationCodeGenerator().generateConfirmationCode();
 
             database.addUser(user);
 
-            //method send e-mail
+            SMSsender smSsender = new SMSsender();
+            smSsender.sendSms(user.getLogin(),user.getConfirmationCode());
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
@@ -147,13 +147,11 @@ public class Server {
             User user = database.findUserById((Integer) requestBody.get("userId"));
 
             if (user != null){
-                System.out.println(user.toHashMapUser());
-                if (user.getStatus().equals("confirmed")){
+                if (user.isConfirmed()){
                     return new UnsuccessfulResponse("400 Bad Request","User already confirmed");
                 }
-                if (user.getConfirmationCode().equals(requestBody.get("confirmationCode"))){
-                    user.setConfirmationCode();
-                    user.setStatus();
+                if (user.compareConfirmationCode((String)requestBody.get("confirmationCode"))){
+                    user.setStatusConfirmed();
                     return new SuccessfulResponseMessage("200 OK", "Successful confirmed user");
                 } else {
                     return new UnsuccessfulResponse("400 Bad Request","Wrong confirmed code");
