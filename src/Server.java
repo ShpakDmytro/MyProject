@@ -130,7 +130,7 @@ public class Server {
 
             database.addUser(user);
 
-            SMSsender smSsender = new SMSsender();
+            SMSSender smSsender = new SMSSender();
             smSsender.sendSms(user.getLogin(),user.getConfirmationCode());
 
         } catch (JsonProcessingException e) {

@@ -85,17 +85,11 @@ public class User {
         if (confirmationCode == null) {
             return false;
         }
-        if (confirmationCode.equals(code)) {
-            return true;
-        }
-        return false;
+        return confirmationCode.equals(code);
     }
 
     boolean isConfirmed() {
-        if (status.equals("confirmed")) {
-            return true;
-        }
-        return false;
+        return status.equals("confirmed");
     }
 
     public void setAccessToken(String accessToken) {

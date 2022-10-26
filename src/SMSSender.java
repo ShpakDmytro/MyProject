@@ -1,4 +1,3 @@
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -9,26 +8,25 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
-public class SMSsender {
+public class SMSSender {
     public void sendSms(String number, String body) {
 
         String bodyRequest = "api_key=002c2de9&api_secret=w8m0GvlXyXLI6T8b&" +
                 "from=ShadInc&to=" + number + "&text=" + body;
 
         try {
-            String result = sendPOST("https://rest.nexmo.com/sms/json", bodyRequest);
-            System.out.println(result);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
+            CloseableHttpResponse result = sendPOST("https://rest.nexmo.com/sms/json", bodyRequest);
+            System.out.println(result.toString());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
 
     }
 
-    private static String sendPOST(String url, String bodyRequest) throws IOException {
+    private CloseableHttpResponse sendPOST(String url, String bodyRequest) throws IOException {
 
-        String result = "";
         HttpPost post = new HttpPost(url);
-        post.addHeader("Host","rest.nexmo.com");
+        post.addHeader("Host", "rest.nexmo.com");
         post.addHeader("Content-Type", "application/x-www-form-urlencoded");
 
         try {
@@ -37,13 +35,17 @@ public class SMSsender {
             System.out.println(e);
         }
 
-        try (CloseableHttpClient httpClient = HttpClients.createDefault();
-             CloseableHttpResponse response = httpClient.execute(post)) {
-            result = EntityUtils.toString(response.getEntity());
+        CloseableHttpResponse response = null;
+
+        try (CloseableHttpClient httpClient = HttpClients.createDefault()) {
+            response = httpClient.execute(post);
+            if (response.getStatusLine().getStatusCode() != 200) {
+                throw new IOException("Wrong work with request");
+            }
         } catch (IOException e) {
             System.out.println(e);
         }
 
-        return result;
+        return response;
     }
 }
