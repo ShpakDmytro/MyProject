@@ -1,6 +1,7 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import java.awt.*;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -46,11 +47,18 @@ public class Server {
 
     private Request readRequest(BufferedReader in) throws IOException {
         int contentLength = 0;
+
+        ArrayList<String> headers = new ArrayList<>();
         StringBuilder requestInSb = new StringBuilder();
         while (true) {
             String line = in.readLine();
+
             if (line == null || line.length() == 0) break;
             else requestInSb.append(line).append("\n");
+
+            if (line.contains(":")) {
+                headers.add(line);
+            }
 
             if (line.split(":")[0].equals("Content-Length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
@@ -63,15 +71,26 @@ public class Server {
             requestInSb.append((char) in.read());
             read++;
         }
-        String request = requestInSb.toString();
-        String method = request.split("\n")[0].split(" ")[0];
-        String command = request.split("\n")[0].split(" ")[1];
+
+        String requestAsString = requestInSb.toString();
+        String method = requestAsString.split("\n")[0].split(" ")[0];
+        String command = requestAsString.split("\n")[0].split(" ")[1];
         String body = "";
+
         try {
-            body = request.split("\n\n")[1];
+            body = requestAsString.split("\n\n")[1];
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
-        return new Request(method, command, body);
+
+        ArrayList <HTTPHeader> headersAsObject = new ArrayList<>();
+        for (String header : headers) {
+            HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0],
+                    header.split(":")[1]);
+            headersAsObject.add(httpHeader);
+        }
+
+        return new  Request(method,command,body,headersAsObject);
+
     }
 
     private void programLogic(Request objRequest, PrintStream pout) {
@@ -80,7 +99,7 @@ public class Server {
         if (objRequest.getEndpoint().equals("POST /sign-up")) {
             response = cmdSignUp(objRequest);
             database.saveData();
-        } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")){
+        } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")) {
             response = cmdFinishSignUp(objRequest);
             database.saveData();
         } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
@@ -107,7 +126,6 @@ public class Server {
             response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
         }
         pout.print(response.serialize());
-        System.out.println(response.serialize());
         pout.close();
     }
 
@@ -131,7 +149,7 @@ public class Server {
             database.addUser(user);
 
             SMSSender smSsender = new SMSSender();
-            smSsender.sendSms(user.getLogin(),user.getConfirmationCode());
+            smSsender.sendSms(user.getLogin(), user.getConfirmationCode());
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
@@ -139,6 +157,7 @@ public class Server {
 
         return new SuccessfulResponseMessage("200 OK", "Successful add new user");
     }
+
     private Response cmdFinishSignUp(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -146,22 +165,22 @@ public class Server {
             HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
             User user = database.findUserById((Integer) requestBody.get("userId"));
 
-            if (user != null){
-                if (user.isConfirmed()){
-                    return new UnsuccessfulResponse("400 Bad Request","User already confirmed");
+            if (user != null) {
+                if (user.isConfirmed()) {
+                    return new UnsuccessfulResponse("400 Bad Request", "User already confirmed");
                 }
-                if (user.compareConfirmationCode((String)requestBody.get("confirmationCode"))){
+                if (user.compareConfirmationCode((String) requestBody.get("confirmationCode"))) {
                     user.setStatusConfirmed();
                     return new SuccessfulResponseMessage("200 OK", "Successful confirmed user");
                 } else {
-                    return new UnsuccessfulResponse("400 Bad Request","Wrong confirmed code");
+                    return new UnsuccessfulResponse("400 Bad Request", "Wrong confirmed code");
                 }
             }
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
-        return new UnsuccessfulResponse("404 Not Found","User not found");
+        return new UnsuccessfulResponse("404 Not Found", "User not found");
     }
 
     private Response cmdSignIn(Request objRequest) {
@@ -290,9 +309,9 @@ public class Server {
         }
 
         HashMap currentUser = user.toHashMapUser();
-        ArrayList <HashMap> boughtListForResponse = (ArrayList<HashMap>) currentUser.get("boughtlist");
+        ArrayList<HashMap> boughtListForResponse = (ArrayList<HashMap>) currentUser.get("boughtlist");
 
-        return new SuccessfulResponseArray("200 OK",boughtListForResponse);
+        return new SuccessfulResponseArray("200 OK", boughtListForResponse);
     }
 
     public Response cmdListProductUsers(Request objRequest) {
@@ -304,7 +323,7 @@ public class Server {
 
         if (product != null) {
             HashMap currentProduct = product.toHashMapProduct();
-            ArrayList <HashMap> userBuyForResponse = (ArrayList<HashMap>) currentProduct.get("userBuy");
+            ArrayList<HashMap> userBuyForResponse = (ArrayList<HashMap>) currentProduct.get("userBuy");
             return new SuccessfulResponseArray("200 OK", userBuyForResponse);
         } else {
             return new SuccessfulResponseMessage("200 OK", "Product don`t buying");
