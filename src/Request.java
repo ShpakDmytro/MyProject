@@ -8,12 +8,12 @@ public class Request {
     String endpoint;
     ArrayList <HTTPHeader> headers;
 
-    public Request(String method, String command, String body){
+    public Request(String method, String command, String body,ArrayList <HTTPHeader> headers ){
         this.method = method;
         this.command = command;
         this.body = body;
         this.endpoint = this.method + " " + this.command;
-        this.headers = new ArrayList<>();
+        this.headers = headers;
     }
 
     public String getEndpoint(){

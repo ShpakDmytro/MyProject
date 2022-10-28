@@ -82,15 +82,15 @@ public class Server {
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
 
-        Request request = new Request(method, command,body);
-
+        ArrayList <HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {
             HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0],
                     header.split(":")[1]);
-            request.headers.add(httpHeader);
+            headersAsObject.add(httpHeader);
         }
 
-        return request;
+        return new  Request(method,command,body,headersAsObject);
+
     }
 
     private void programLogic(Request objRequest, PrintStream pout) {
