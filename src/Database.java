@@ -1,24 +1,10 @@
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.charset.StandardCharsets;
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.UUID;
 
 public class Database {
-    int id;
-    ArrayList<User> users;
-    ArrayList<Product> products;
 
-    public Database() {
-        this.id = 0;
-        this.users = new ArrayList<>();
-        this.products = new ArrayList<>();
-    }
+    public Database() {}
 
     private Connection createConnection() {
 
@@ -79,15 +65,44 @@ public class Database {
         }
     }
 
-    void updateUserAfterFinishSignUp(User user) {
+    public void insertPurchase(String idUser, String idProduct) {
+
+        Connection connection = createConnection();
+        try {
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, idUser, idProduct) VALUES (?,?,?)");
+            stmt.setString(1, UUID.randomUUID().toString());
+            stmt.setString(2, idUser);
+            stmt.setString(3, idProduct);
+            stmt.execute();
+
+        } catch (SQLException e) {
+            System.err.println("Something wrong with purchases add");
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    void updateUser(User user) {
 
         Connection connection = createConnection();
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE users SET confirmationCode = ?, status = ? WHERE id = ?");
-            stmt.setString(1, user.getConfirmationCode());
-            stmt.setString(2, user.getStatus());
-            stmt.setString(3, user.getId());
+            PreparedStatement stmt = connection.prepareStatement("UPDATE users SET id = ?, firstName = ?, lastName = ?, " +
+                    "amount = ?, login = ?, password = ?, accessToken = ?,  status = ?, confirmationCode = ? WHERE id = ?");
+            stmt.setString(1, user.getId());
+            stmt.setString(2, user.getFirstName());
+            stmt.setString(3, user.getLastName());
+            stmt.setDouble(4, user.getAmount());
+            stmt.setString(5, user.getLogin());
+            stmt.setString(6, user.getPassword());
+            stmt.setString(7, user.getAccessToken());
+            stmt.setString(8, user.getStatus());
+            stmt.setString(9, user.getConfirmationCode());
+            stmt.setString(10, user.getId());
             stmt.execute();
 
         } catch (SQLException e) {
@@ -98,44 +113,6 @@ public class Database {
                 connection.close();
             } catch (SQLException ignored) {
             }
-        }
-    }
-
-    void updateUserAccessToken(User user) {
-        Connection connection = createConnection();
-
-        try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE users SET accessToken = ? WHERE id = ?");
-            stmt.setString(1, user.getAccessToken());
-            stmt.setString(2, user.getId());
-            stmt.execute();
-
-        } catch (SQLException e) {
-            System.err.println("Something wrong with user update");
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {}
-        }
-    }
-
-    void updateUserAmountAfterBuying(User user) {
-        Connection connection = createConnection();
-
-        try {
-            PreparedStatement stmt = connection.prepareStatement("UPDATE users SET amount = ? WHERE id = ?");
-            stmt.setDouble(1, user.getAmount());
-            stmt.setString(2, user.getId());
-            stmt.execute();
-
-        } catch (SQLException e) {
-            System.err.println("Something wrong with user update");
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {}
         }
     }
 
@@ -269,18 +246,100 @@ public class Database {
     ArrayList<User> getAllUser() {
         ArrayList<User> usersForResponse = new ArrayList<>();
 
-        for (User user : users) {
-            usersForResponse.add(user);
+        Connection connection = createConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                User user = new User(resultSet.getString("id"), resultSet.getString("firstName"),
+                        resultSet.getString("lastName"), resultSet.getDouble("amount"),
+                        resultSet.getString("login"), resultSet.getString("password"),
+                        resultSet.getString("accessToken"), resultSet.getString("status"),
+                        resultSet.getString("confirmationCode"));
+                usersForResponse.add(user);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {}
         }
         return usersForResponse;
     }
 
     ArrayList<Product> getAllProduct() {
         ArrayList<Product> productsForResponse = new ArrayList<>();
-        for (Product product : products) {
-            productsForResponse.add(product);
+
+        Connection connection = createConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM products");
+
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Product product = new Product(resultSet.getString("id"), resultSet.getString("name"),
+                        resultSet.getDouble("price"));
+                productsForResponse.add(product);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {}
         }
         return productsForResponse;
     }
 
+    public ArrayList<Purchases> getProductPurchases (String idProduct) {
+        Connection connection = createConnection();
+        ArrayList <Purchases> purchases = new ArrayList<>();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE idProduct = ?");
+            statement.setString(1, idProduct);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Purchases purchase =  new Purchases(resultSet.getString("id"), resultSet.getString("idUser"),
+                        resultSet.getString("idProduct"));
+                purchases.add(purchase);
+            }
+            return purchases;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+    public ArrayList<Purchases> getUserPurchases(String idUser) {
+        Connection connection = createConnection();
+        ArrayList <Purchases> purchases = new ArrayList<>();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE idUser = ?");
+            statement.setString(1, idUser);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Purchases purchase =  new Purchases(resultSet.getString("id"), resultSet.getString("idUser"),
+                        resultSet.getString("idProduct"));
+                purchases.add(purchase);
+            }
+            return purchases;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
 }
