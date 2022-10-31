@@ -305,7 +305,7 @@ public class Server {
         try {
             user.buyProduct(product);
             database.updateUser(user);
-            database.insertPurchase(user, product);
+            database.insertPurchase(new Purchase( UUID.randomUUID().toString(),user.getId(),product.getId()));
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");

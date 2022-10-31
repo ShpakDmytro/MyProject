@@ -9,6 +9,10 @@ public class Purchase {
         this.productId = productId;
     }
 
+    public String getId () {
+        return id;
+    }
+
     public String getProductId() {
         return productId;
     }

@@ -65,14 +65,14 @@ public class Database {
         }
     }
 
-    public void insertPurchase(User user, Product product) {
+    public void insertPurchase(Purchase purchase) {
 
         Connection connection = createConnection();
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, userId, productId) VALUES (?,?,?)");
-            stmt.setString(1, UUID.randomUUID().toString());
-            stmt.setString(2, user.getId());
-            stmt.setString(3, product.getId());
+            stmt.setString(1,purchase.getId());
+            stmt.setString(2, purchase.getUserId());
+            stmt.setString(3, purchase.getProductId());
             stmt.execute();
 
         } catch (SQLException e) {
