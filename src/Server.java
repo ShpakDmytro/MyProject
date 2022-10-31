@@ -305,7 +305,7 @@ public class Server {
         try {
             user.buyProduct(product);
             database.updateUser(user);
-            database.insertPurchase(user.getId(),product.getId());
+            database.insertPurchase(user, product);
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");
@@ -318,18 +318,18 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
-            String idUser = (String) requestBody.get("userId");
-            User user = database.findUserById(idUser);
+
+            User user = database.findUserById((String) requestBody.get("userId"));
             if (user == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong user Id");
             }
 
             ArrayList <HashMap> userBoughtList = new ArrayList<>();
 
-            ArrayList <Purchases> purchases = database.getUserPurchases(user.getId());
+            ArrayList <Purchase> purchases = database.getUserPurchases(user);
 
-            for (Purchases purchase : purchases) {
-                userBoughtList.add(database.findProductById(purchase.getIdProduct()).toHashMapProduct());
+            for (Purchase purchase : purchases) {
+                userBoughtList.add(database.findProductById(purchase.getProductId()).toHashMapProduct());
             }
 
             return new SuccessfulResponseArray("200 OK", userBoughtList);
@@ -351,10 +351,10 @@ public class Server {
 
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
-            ArrayList <Purchases> purchases = database.getProductPurchases(product.getId());
+            ArrayList <Purchase> purchases = database.getProductPurchases(product);
 
-            for (Purchases purchase : purchases) {
-                userBuy.add(database.findUserById(purchase.getIdUser()).toHashMapUser());
+            for (Purchase purchase : purchases) {
+                userBuy.add(database.findUserById(purchase.getUserId()).toHashMapUser());
             }
 
             return new SuccessfulResponseArray("200 OK", userBuy);

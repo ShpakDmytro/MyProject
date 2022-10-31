@@ -65,14 +65,14 @@ public class Database {
         }
     }
 
-    public void insertPurchase(String idUser, String idProduct) {
+    public void insertPurchase(User user, Product product) {
 
         Connection connection = createConnection();
         try {
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, idUser, idProduct) VALUES (?,?,?)");
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, userId, productId) VALUES (?,?,?)");
             stmt.setString(1, UUID.randomUUID().toString());
-            stmt.setString(2, idUser);
-            stmt.setString(3, idProduct);
+            stmt.setString(2, user.getId());
+            stmt.setString(3, product.getId());
             stmt.execute();
 
         } catch (SQLException e) {
@@ -296,17 +296,17 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList<Purchases> getProductPurchases (String idProduct) {
+    public ArrayList<Purchase> getProductPurchases (Product product) {
         Connection connection = createConnection();
-        ArrayList <Purchases> purchases = new ArrayList<>();
+        ArrayList <Purchase> purchases = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE idProduct = ?");
-            statement.setString(1, idProduct);
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE productId = ?");
+            statement.setString(1, product.getId());
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Purchases purchase =  new Purchases(resultSet.getString("id"), resultSet.getString("idUser"),
-                        resultSet.getString("idProduct"));
+                Purchase purchase =  new Purchase(resultSet.getString("id"), resultSet.getString("userId"),
+                        resultSet.getString("productId"));
                 purchases.add(purchase);
             }
             return purchases;
@@ -319,17 +319,17 @@ public class Database {
             }
         }
     }
-    public ArrayList<Purchases> getUserPurchases(String idUser) {
+    public ArrayList<Purchase> getUserPurchases(User user) {
         Connection connection = createConnection();
-        ArrayList <Purchases> purchases = new ArrayList<>();
+        ArrayList <Purchase> purchases = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE idUser = ?");
-            statement.setString(1, idUser);
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE userId = ?");
+            statement.setString(1, user.getId());
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Purchases purchase =  new Purchases(resultSet.getString("id"), resultSet.getString("idUser"),
-                        resultSet.getString("idProduct"));
+                Purchase purchase =  new Purchase(resultSet.getString("id"), resultSet.getString("userId"),
+                        resultSet.getString("productId"));
                 purchases.add(purchase);
             }
             return purchases;
