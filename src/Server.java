@@ -1,11 +1,11 @@
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-import java.awt.*;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.UUID;
 
 public class Server {
     static final int port = 8080;
@@ -23,7 +23,6 @@ public class Server {
     public void run() {
 
         try {
-            this.database.loadData();
             ServerSocket socket = new ServerSocket(port);
 
             while (true) {
@@ -82,51 +81,59 @@ public class Server {
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
 
-        ArrayList <HTTPHeader> headersAsObject = new ArrayList<>();
+        ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {
             HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0],
                     header.split(":")[1]);
             headersAsObject.add(httpHeader);
         }
 
-        return new  Request(method,command,body,headersAsObject);
+        return new Request(method, command, body, headersAsObject);
 
     }
 
     private void programLogic(Request objRequest, PrintStream pout) {
         Response response = null;
+        try {
+            if (objRequest.getEndpoint().equals("POST /sign-up")) {
+                response = cmdSignUp(objRequest);
 
-        if (objRequest.getEndpoint().equals("POST /sign-up")) {
-            response = cmdSignUp(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")) {
-            response = cmdFinishSignUp(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
-            response = cmdSignIn(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("POST /sign-out")) {
-            response = cmdSignOut(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("POST /product")) {
-            response = cmdNewProduct(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("GET /users")) {
-            response = cmdListUsers();
-        } else if (objRequest.getEndpoint().equals("GET /products")) {
-            response = cmdListProducts();
-        } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
-            response = cmdBuyProduct(objRequest);
-            database.saveData();
-        } else if (objRequest.getEndpoint().equals("GET /user-products")) {
-            response = cmdListUsersProduct(objRequest);
-        } else if (objRequest.getEndpoint().equals("GET /product-users")) {
-            response = cmdListProductUsers(objRequest);
-        } else {
-            response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
+            } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")) {
+                response = cmdFinishSignUp(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
+                response = cmdSignIn(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("POST /sign-out")) {
+                response = cmdSignOut(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("POST /product")) {
+                response = cmdNewProduct(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("GET /users")) {
+                response = cmdListUsers();
+
+            } else if (objRequest.getEndpoint().equals("GET /products")) {
+                response = cmdListProducts();
+
+            } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
+                response = cmdBuyProduct(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("POST /user-products")) {
+                response = cmdListUsersProduct(objRequest);
+
+            } else if (objRequest.getEndpoint().equals("POST /product-users")) {
+                response = cmdListProductUsers(objRequest);
+
+            } else {
+                response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
+            }
+        } catch (Throwable throwable) {
+            response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
         pout.print(response.serialize());
         pout.close();
+
     }
 
     public Response cmdSignUp(Request objRequest) {
@@ -142,11 +149,11 @@ public class Server {
                 return new UnsuccessfulResponse("400 Bad Request", "This login already exists");
             }
 
-            User user = new User(database.nextId(), (String) requestBody.get("firstName"),
+            User user = new User(UUID.randomUUID().toString(), (String) requestBody.get("firstName"),
                     (String) requestBody.get("lastName"), (Double) requestBody.get("amount"),
                     (String) requestBody.get("login"), (String) requestBody.get("password"));
 
-            database.addUser(user);
+            database.insertUser(user);
 
             SMSSender smSsender = new SMSSender();
             smSsender.sendSms(user.getLogin(), user.getConfirmationCode());
@@ -163,7 +170,7 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
-            User user = database.findUserById((Integer) requestBody.get("userId"));
+            User user = database.findUserById((String) requestBody.get("userId"));
 
             if (user != null) {
                 if (user.isConfirmed()) {
@@ -171,6 +178,7 @@ public class Server {
                 }
                 if (user.compareConfirmationCode((String) requestBody.get("confirmationCode"))) {
                     user.setStatusConfirmed();
+                    database.updateUser(user);
                     return new SuccessfulResponseMessage("200 OK", "Successful confirmed user");
                 } else {
                     return new UnsuccessfulResponse("400 Bad Request", "Wrong confirmed code");
@@ -195,6 +203,7 @@ public class Server {
             if (user != null) {
                 String accessToken = new TokenGenerator().generateToken();
                 user.setAccessToken(accessToken);
+                database.updateUser(user);
                 return new SuccessfulResponseSignIn(accessToken);
             }
 
@@ -212,9 +221,10 @@ public class Server {
             HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
 
             User user = database.findUserByAccessToken((String) requestBody.get("accessToken"));
-            System.out.println((String) requestBody.get("accessToken"));
+
             if (user != null) {
                 user.setAccessToken(null);
+                database.updateUser(user);
                 return new SuccessfulResponseMessage("200 OK", "The exit has been successfully completed");
             }
 
@@ -230,12 +240,14 @@ public class Server {
 
         try {
             HashMap createProduct = mapper.readValue(objRequest.body, HashMap.class);
+
             if ((Double) createProduct.get("price") <= 0) {
                 return new UnsuccessfulResponse("400", "Wrong amount value");
             }
-            Product product = new Product(database.nextId(), (String) createProduct.get("name"), (Double) createProduct.get("price"));
+            Product product = new Product(UUID.randomUUID().toString(), (String) createProduct.get("name"),
+                    (Double) createProduct.get("price"));
 
-            database.addProduct(product);
+            database.insertProduct(product);
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
@@ -268,13 +280,13 @@ public class Server {
 
     public Response cmdBuyProduct(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
-        int userIdForBuying;
-        int productIdForBuying;
+        String userIdForBuying;
+        String productIdForBuying;
 
         try {
             HashMap buyingRequest = mapper.readValue(objRequest.body, HashMap.class);
-            userIdForBuying = (int) buyingRequest.get("userId");
-            productIdForBuying = (int) buyingRequest.get("productId");
+            userIdForBuying = (String) buyingRequest.get("userId");
+            productIdForBuying = (String) buyingRequest.get("productId");
 
         } catch (JsonProcessingException e) {
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
@@ -292,7 +304,8 @@ public class Server {
 
         try {
             user.buyProduct(product);
-            product.addUser(user);
+            database.updateUser(user);
+            database.insertPurchase(new Purchase( UUID.randomUUID().toString(),user.getId(),product.getId()));
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");
@@ -301,32 +314,52 @@ public class Server {
 
     public Response cmdListUsersProduct(Request objRequest) {
 
-        int number = Integer.parseInt(objRequest.body.split(",")[0]);
+        ObjectMapper mapper = new ObjectMapper();
 
-        User user = database.findUserById(number);
-        if (user == null) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
+        try {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+
+            User user = database.findUserById((String) requestBody.get("userId"));
+            if (user == null) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong user Id");
+            }
+
+            ArrayList <HashMap> userBoughtList = new ArrayList<>();
+
+            ArrayList <Purchase> purchases = database.getUserPurchases(user.getId());
+
+            for (Purchase purchase : purchases) {
+                userBoughtList.add(database.findProductById(purchase.getProductId()).toHashMapProduct());
+            }
+
+            return new SuccessfulResponseArray("200 OK", userBoughtList);
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
-
-        HashMap currentUser = user.toHashMapUser();
-        ArrayList<HashMap> boughtListForResponse = (ArrayList<HashMap>) currentUser.get("boughtlist");
-
-        return new SuccessfulResponseArray("200 OK", boughtListForResponse);
     }
 
     public Response cmdListProductUsers(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
 
-        String checkProductAsString = objRequest.body.split(",")[0];
-        int checkProductAsInt = Integer.parseInt(checkProductAsString);
+        try {
+            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            String idProduct = (String) requestBody.get("idProduct");
+            Product product = database.findProductById(idProduct);
+            if (product == null) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
+            }
 
-        Product product = database.findProductById(checkProductAsInt);
+            ArrayList <HashMap> userBuy = new ArrayList<>();
 
-        if (product != null) {
-            HashMap currentProduct = product.toHashMapProduct();
-            ArrayList<HashMap> userBuyForResponse = (ArrayList<HashMap>) currentProduct.get("userBuy");
-            return new SuccessfulResponseArray("200 OK", userBuyForResponse);
-        } else {
-            return new SuccessfulResponseMessage("200 OK", "Product don`t buying");
+            ArrayList <Purchase> purchases = database.getProductPurchases(product.getId());
+
+            for (Purchase purchase : purchases) {
+                userBuy.add(database.findUserById(purchase.getUserId()).toHashMapUser());
+            }
+
+            return new SuccessfulResponseArray("200 OK", userBuy);
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
     }
 }

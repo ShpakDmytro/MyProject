@@ -1,5 +1,6 @@
 import java.security.SecureRandom;
 
+
 public class TokenGenerator {
     protected static SecureRandom random = new SecureRandom();
 
