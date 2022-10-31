@@ -296,12 +296,12 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList<Purchase> getProductPurchases (Product product) {
+    public ArrayList<Purchase> getProductPurchases (String productId) {
         Connection connection = createConnection();
         ArrayList <Purchase> purchases = new ArrayList<>();
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE productId = ?");
-            statement.setString(1, product.getId());
+            statement.setString(1, productId);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -319,12 +319,12 @@ public class Database {
             }
         }
     }
-    public ArrayList<Purchase> getUserPurchases(User user) {
+    public ArrayList<Purchase> getUserPurchases(String userId) {
         Connection connection = createConnection();
         ArrayList <Purchase> purchases = new ArrayList<>();
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE userId = ?");
-            statement.setString(1, user.getId());
+            statement.setString(1, userId);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {

@@ -326,7 +326,7 @@ public class Server {
 
             ArrayList <HashMap> userBoughtList = new ArrayList<>();
 
-            ArrayList <Purchase> purchases = database.getUserPurchases(user);
+            ArrayList <Purchase> purchases = database.getUserPurchases(user.getId());
 
             for (Purchase purchase : purchases) {
                 userBoughtList.add(database.findProductById(purchase.getProductId()).toHashMapProduct());
@@ -351,7 +351,7 @@ public class Server {
 
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
-            ArrayList <Purchase> purchases = database.getProductPurchases(product);
+            ArrayList <Purchase> purchases = database.getProductPurchases(product.getId());
 
             for (Purchase purchase : purchases) {
                 userBuy.add(database.findUserById(purchase.getUserId()).toHashMapUser());
