@@ -74,8 +74,10 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
+
         String method = requestAsString.split("\n")[0].split(" ")[0];
-        String command = requestAsString.split("\n")[0].split(" ")[1];
+        String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
+
         String body = "";
 
         try {
@@ -95,7 +97,7 @@ public class Server {
             HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0], header.split(":")[1]);
             headersAsObject.add(httpHeader);
         }
-        System.out.println(queryStringAsHashMap);
+
         return new Request(method, command, body, headersAsObject, queryStringAsHashMap);
 
     }
