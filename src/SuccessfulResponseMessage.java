@@ -1,6 +1,6 @@
 public class SuccessfulResponseMessage implements Response {
-    String status;
-    String bodyResponse;
+    private String status;
+    private String bodyResponse;
 
     public SuccessfulResponseMessage(String status, String bodyResponse) {
         this.status = "HTTP/1.0 " + status;

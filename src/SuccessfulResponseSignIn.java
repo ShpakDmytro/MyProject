@@ -2,9 +2,9 @@
 
 public class SuccessfulResponseSignIn implements Response {
 
-    String status;
-    String bodyResponse;
-    String accessToken;
+    private String status;
+    private String bodyResponse;
+    private String accessToken;
 
     public SuccessfulResponseSignIn(String accessToken) {
         this.status = "HTTP/1.0 200 OK";

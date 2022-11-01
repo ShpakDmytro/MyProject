@@ -1,6 +1,6 @@
 public class UnsuccessfulResponse implements Response {
-    String status;
-    String bodyResponse;
+    private String status;
+    private String bodyResponse;
 
     public UnsuccessfulResponse(String status, String bodyResponse) {
         this.status = "HTTP/1.0 " + status;
