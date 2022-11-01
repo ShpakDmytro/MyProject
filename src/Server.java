@@ -64,14 +64,6 @@ public class Server {
             if (line.contains(":")) {
                 headers.add(line);
             }
-
-            if (line.contains("?")){
-                String queryString = line.split("\\?")[1].split(" ")[0];
-                String [] querys = queryString.split("&");
-                for (String query : querys){
-                    queryStringAsHashMap.put(query.split("=")[0],query.split("=")[1]);
-                }
-            }
         }
         requestInSb.append("\n");
 
@@ -90,12 +82,20 @@ public class Server {
             body = requestAsString.split("\n\n")[1];
         } catch (ArrayIndexOutOfBoundsException ignored) {}
 
+        if (requestAsString.split("\n")[0].contains("?")){
+            String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
+            String [] querys = queryString.split("&");
+            for (String query : querys){
+                queryStringAsHashMap.put(query.split("=")[0],query.split("=")[1]);
+            }
+        }
+
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {
             HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0], header.split(":")[1]);
             headersAsObject.add(httpHeader);
         }
-
+        System.out.println(queryStringAsHashMap);
         return new Request(method, command, body, headersAsObject, queryStringAsHashMap);
 
     }
