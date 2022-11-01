@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SuccessfulResponseArray implements Response {
-    String status;
-    String bodyResponse;
+    private String status;
+    private String bodyResponse;
 
     public SuccessfulResponseArray(String status, ArrayList<HashMap> bodyResponse) {
         ObjectMapper mapper = new ObjectMapper();

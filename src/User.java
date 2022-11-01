@@ -1,15 +1,16 @@
 import java.util.HashMap;
+import java.util.UUID;
 
 public class User {
-    String id;
-    String firstName;
-    String lastName;
+    private String id;
+    private String firstName;
+    private String lastName;
     double amount;
-    String login;
-    String password;
-    String accessToken;
-    String status;
-    String confirmationCode;
+    private String login;
+    private String password;
+    private String accessToken;
+    private String status;
+    private String confirmationCode;
 
     //create User
     public User(String id, String firstName, String lastName, double amount,
@@ -22,7 +23,7 @@ public class User {
         this.password = password;
         this.accessToken = null;
         this.status = "unconfirmed";
-        this.confirmationCode = new ConfirmationCodeGenerator().generateConfirmationCode();
+        this.confirmationCode = UUID.randomUUID().toString();
     }
 
     //reconstraction User from bd

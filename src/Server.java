@@ -10,7 +10,7 @@ import java.util.UUID;
 public class Server {
     static final int port = 8080;
 
-    Database database;
+    private Database database;
 
     public Server() {
         this.database = new Database();
@@ -49,18 +49,20 @@ public class Server {
 
         ArrayList<String> headers = new ArrayList<>();
         StringBuilder requestInSb = new StringBuilder();
+        HashMap <String,String> queryStringAsHashMap = new HashMap<>();
+
         while (true) {
             String line = in.readLine();
 
             if (line == null || line.length() == 0) break;
             else requestInSb.append(line).append("\n");
 
-            if (line.contains(":")) {
-                headers.add(line);
-            }
-
             if (line.split(":")[0].equals("Content-Length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
+            }
+
+            if (line.contains(":")) {
+                headers.add(line);
             }
         }
         requestInSb.append("\n");
@@ -72,23 +74,31 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
+
         String method = requestAsString.split("\n")[0].split(" ")[0];
-        String command = requestAsString.split("\n")[0].split(" ")[1];
+        String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
+
         String body = "";
 
         try {
             body = requestAsString.split("\n\n")[1];
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+        } catch (ArrayIndexOutOfBoundsException ignored) {}
+
+        if (requestAsString.split("\n")[0].contains("?")){
+            String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
+            String [] querys = queryString.split("&");
+            for (String query : querys){
+                queryStringAsHashMap.put(query.split("=")[0],query.split("=")[1]);
+            }
         }
 
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {
-            HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0],
-                    header.split(":")[1]);
+            HTTPHeader httpHeader = new HTTPHeader(header.split(":")[0], header.split(":")[1]);
             headersAsObject.add(httpHeader);
         }
 
-        return new Request(method, command, body, headersAsObject);
+        return new Request(method, command, body, headersAsObject, queryStringAsHashMap);
 
     }
 
@@ -140,7 +150,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             if ((Double) requestBody.get("amount") <= 0) {
                 return new UnsuccessfulResponse("400 Bad Request", "Wrong amount value");
             }
@@ -169,7 +179,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             User user = database.findUserById((String) requestBody.get("userId"));
 
             if (user != null) {
@@ -195,16 +205,15 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             String login = (String) requestBody.get("login");
             String password = (String) requestBody.get("password");
 
             User user = database.findUserByLoginAndPassword(login, password);
             if (user != null) {
-                String accessToken = new TokenGenerator().generateToken();
-                user.setAccessToken(accessToken);
+                user.setAccessToken(UUID.randomUUID().toString());
                 database.updateUser(user);
-                return new SuccessfulResponseSignIn(accessToken);
+                return new SuccessfulResponseSignIn(user.getAccessToken());
             }
 
         } catch (JsonProcessingException e) {
@@ -218,7 +227,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
 
             User user = database.findUserByAccessToken((String) requestBody.get("accessToken"));
 
@@ -239,7 +248,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap createProduct = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap createProduct = mapper.readValue(objRequest.getBody(), HashMap.class);
 
             if ((Double) createProduct.get("price") <= 0) {
                 return new UnsuccessfulResponse("400", "Wrong amount value");
@@ -284,7 +293,7 @@ public class Server {
         String productIdForBuying;
 
         try {
-            HashMap buyingRequest = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap buyingRequest = mapper.readValue(objRequest.getBody(), HashMap.class);
             userIdForBuying = (String) buyingRequest.get("userId");
             productIdForBuying = (String) buyingRequest.get("productId");
 
@@ -317,7 +326,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
 
             User user = database.findUserById((String) requestBody.get("userId"));
             if (user == null) {
@@ -342,7 +351,7 @@ public class Server {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            HashMap requestBody = mapper.readValue(objRequest.body, HashMap.class);
+            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             String idProduct = (String) requestBody.get("idProduct");
             Product product = database.findProductById(idProduct);
             if (product == null) {

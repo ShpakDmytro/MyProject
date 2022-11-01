@@ -1,7 +1,7 @@
 public class Purchase {
-    String id;
-    String userId;
-    String productId;
+    private String id;
+    private String userId;
+    private String productId;
 
     public Purchase(String id, String userId, String productId) {
         this.id = id;
