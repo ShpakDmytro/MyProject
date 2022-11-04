@@ -327,18 +327,18 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
+            ArrayList <Product> products = database.getUserPurchases((String) requestBody.get("userId"));
 
-            User user = database.findUserById((String) requestBody.get("userId"));
-            if (user == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong user Id");
+            if (products.size() < 1) {
+                return new UnsuccessfulResponse("400 Bad Request", "User haven`t buy");
             }
 
             ArrayList <HashMap> userBoughtList = new ArrayList<>();
-
-            ArrayList <Purchase> purchases = database.getUserPurchases(user.getId());
-
-            for (Purchase purchase : purchases) {
-                userBoughtList.add(database.findProductById(purchase.getProductId()).toHashMapProduct());
+            for (Product product : products) {
+                HashMap <String,Object> productForResponse = new HashMap<>();
+                productForResponse.put("name", product.getName());
+                productForResponse.put("price",product.getPrice());
+                userBoughtList.add(productForResponse);
             }
 
             return new SuccessfulResponseArray("200 OK", userBoughtList);
@@ -352,18 +352,19 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-            String idProduct = (String) requestBody.get("idProduct");
-            Product product = database.findProductById(idProduct);
-            if (product == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
-            }
 
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
-            ArrayList <Purchase> purchases = database.getProductPurchases(product.getId());
+            ArrayList <User> users = database.getProductPurchases((String) requestBody.get("productId"));
+            if (users.size() < 1) {
+                return new UnsuccessfulResponse("400 Bad Request", "Product haven`t user");
+            }
 
-            for (Purchase purchase : purchases) {
-                userBuy.add(database.findUserById(purchase.getUserId()).toHashMapUser());
+            for (User user: users) {
+                HashMap <String,String> userAsHashMap = new HashMap<>();
+                userAsHashMap.put("firstName",user.getFirstName());
+                userAsHashMap.put("lastName",user.getLastName());
+                userBuy.add(userAsHashMap);
             }
 
             return new SuccessfulResponseArray("200 OK", userBuy);

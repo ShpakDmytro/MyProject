@@ -40,6 +40,10 @@ public class User {
         this.confirmationCode = confirmationCode;
     }
 
+    public User (String firstName, String lastName) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+    }
     public String getId() {
         return id;
     }

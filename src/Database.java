@@ -295,20 +295,20 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList<Purchase> getProductPurchases (String productId) {
+    public ArrayList <User> getProductPurchases (String productId) {
         Connection connection = createConnection();
-        ArrayList <Purchase> purchases = new ArrayList<>();
+        ArrayList <User> users = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE productId = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT users.firstName,users.lastName FROM purchases JOIN users ON users.id = purchases.userId WHERE purchases.productId = ?");
             statement.setString(1, productId);
             ResultSet resultSet = statement.executeQuery();
-
             while (resultSet.next()) {
-                Purchase purchase =  new Purchase(resultSet.getString("id"), resultSet.getString("userId"),
-                        resultSet.getString("productId"));
-                purchases.add(purchase);
+
+                User user =  new User (resultSet.getString("firstName"),
+                                       resultSet.getString("lastName"));
+                users.add(user);
             }
-            return purchases;
+            return users;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
@@ -318,20 +318,20 @@ public class Database {
             }
         }
     }
-    public ArrayList<Purchase> getUserPurchases(String userId) {
+    public ArrayList<Product> getUserPurchases(String userId) {
         Connection connection = createConnection();
-        ArrayList <Purchase> purchases = new ArrayList<>();
+        ArrayList <Product> products = new ArrayList<>();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE userId = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT products.name,products.price FROM purchases JOIN products ON products.id = purchases.productId WHERE purchases.userId = ?");
             statement.setString(1, userId);
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
-                Purchase purchase =  new Purchase(resultSet.getString("id"), resultSet.getString("userId"),
-                        resultSet.getString("productId"));
-                purchases.add(purchase);
+                Product product =  new Product(resultSet.getString("name"),
+                                               resultSet.getDouble("price"));
+                products.add(product);
             }
-            return purchases;
+            return products;
         } catch (SQLException e) {
             throw new RuntimeException(e);
         } finally {
