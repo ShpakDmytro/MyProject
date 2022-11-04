@@ -329,10 +329,6 @@ public class Server {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             ArrayList <Product> products = database.getUserBoughtProduct((String) requestBody.get("userId"));
 
-            if (products.size() < 1) {
-                return new UnsuccessfulResponse("400 Bad Request", "User haven`t buy");
-            }
-
             ArrayList <HashMap> userBoughtList = new ArrayList<>();
             for (Product product : products) {
                 HashMap <String,Object> productForResponse = new HashMap<>();
@@ -356,9 +352,6 @@ public class Server {
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
             ArrayList <User> users = database.getProductСustomers((String) requestBody.get("productId"));
-            if (users.size() < 1) {
-                return new UnsuccessfulResponse("400 Bad Request", "Product haven`t user");
-            }
 
             for (User user: users) {
                 HashMap <String,String> userAsHashMap = new HashMap<>();
