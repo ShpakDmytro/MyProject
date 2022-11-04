@@ -28,4 +28,7 @@ public class Request {
         return body;
     }
 
+    public HashMap getQueryString(){
+        return queryString;
+    }
 }

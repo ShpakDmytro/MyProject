@@ -295,7 +295,7 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList <User> getProductСustomers(String productId) {
+    public ArrayList <User> getProductUsers(String productId) {
         Connection connection = createConnection();
         ArrayList <User> users = new ArrayList<>();
         try {

@@ -49,7 +49,7 @@ public class Server {
 
         ArrayList<String> headers = new ArrayList<>();
         StringBuilder requestInSb = new StringBuilder();
-        HashMap <String,String> queryStringAsHashMap = new HashMap<>();
+        HashMap<String, String> queryStringAsHashMap = new HashMap<>();
 
         while (true) {
             String line = in.readLine();
@@ -82,13 +82,14 @@ public class Server {
 
         try {
             body = requestAsString.split("\n\n")[1];
-        } catch (ArrayIndexOutOfBoundsException ignored) {}
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+        }
 
-        if (requestAsString.split("\n")[0].contains("?")){
+        if (requestAsString.split("\n")[0].contains("?")) {
             String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
-            String [] querys = queryString.split("&");
-            for (String query : querys){
-                queryStringAsHashMap.put(query.split("=")[0],query.split("=")[1]);
+            String[] querys = queryString.split("&");
+            for (String query : querys) {
+                queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
             }
         }
 
@@ -129,10 +130,10 @@ public class Server {
             } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
                 response = cmdBuyProduct(objRequest);
 
-            } else if (objRequest.getEndpoint().equals("POST /user-products")) {
+            } else if (objRequest.getEndpoint().equals("GET /user-products")) {
                 response = cmdListUsersProduct(objRequest);
 
-            } else if (objRequest.getEndpoint().equals("POST /product-users")) {
+            } else if (objRequest.getEndpoint().equals("GET /product-users")) {
                 response = cmdListProductUsers(objRequest);
 
             } else {
@@ -314,7 +315,7 @@ public class Server {
         try {
             user.buyProduct(product);
             database.updateUser(user);
-            database.insertPurchase(new Purchase( UUID.randomUUID().toString(),user.getId(),product.getId()));
+            database.insertPurchase(new Purchase(UUID.randomUUID().toString(), user.getId(), product.getId()));
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");
@@ -323,46 +324,40 @@ public class Server {
 
     public Response cmdListUsersProduct(Request objRequest) {
 
-        ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-            ArrayList <Product> products = database.getUserBoughtProduct((String) requestBody.get("userId"));
-
-            ArrayList <HashMap> userBoughtList = new ArrayList<>();
-            for (Product product : products) {
-                HashMap <String,Object> productForResponse = new HashMap<>();
-                productForResponse.put("name", product.getName());
-                productForResponse.put("price",product.getPrice());
-                userBoughtList.add(productForResponse);
-            }
-
-            return new SuccessfulResponseArray("200 OK", userBoughtList);
-        } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        if (!objRequest.getQueryString().containsKey("userId")) {
+            return new UnsuccessfulResponse("400 Bad Request", "userID is required");
         }
+        ArrayList<Product> products = database.getUserBoughtProduct((String) objRequest.getQueryString().get("userId"));
+
+        ArrayList<HashMap> userBoughtList = new ArrayList<>();
+        for (Product product : products) {
+            HashMap<String, Object> productForResponse = new HashMap<>();
+            productForResponse.put("name", product.getName());
+            productForResponse.put("price", product.getPrice());
+            userBoughtList.add(productForResponse);
+        }
+
+        return new SuccessfulResponseArray("200 OK", userBoughtList);
     }
 
     public Response cmdListProductUsers(Request objRequest) {
-        ObjectMapper mapper = new ObjectMapper();
 
-        try {
-            HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-
-            ArrayList <HashMap> userBuy = new ArrayList<>();
-
-            ArrayList <User> users = database.getProductСustomers((String) requestBody.get("productId"));
-
-            for (User user: users) {
-                HashMap <String,String> userAsHashMap = new HashMap<>();
-                userAsHashMap.put("firstName",user.getFirstName());
-                userAsHashMap.put("lastName",user.getLastName());
-                userBuy.add(userAsHashMap);
-            }
-
-            return new SuccessfulResponseArray("200 OK", userBuy);
-        } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        if (!objRequest.getQueryString().containsKey("productId")) {
+            return new UnsuccessfulResponse("400 Bad Request", "productId is required");
         }
+
+        ArrayList<HashMap> userBuy = new ArrayList<>();
+
+        ArrayList<User> users = database.getProductUsers((String) objRequest.getQueryString().get("productId"));
+
+        for (User user : users) {
+            HashMap<String, String> userAsHashMap = new HashMap<>();
+            userAsHashMap.put("firstName", user.getFirstName());
+            userAsHashMap.put("lastName", user.getLastName());
+            userBuy.add(userAsHashMap);
+        }
+
+        return new SuccessfulResponseArray("200 OK", userBuy);
     }
 }
