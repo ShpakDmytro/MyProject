@@ -327,18 +327,14 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-
-            User user = database.findUserById((String) requestBody.get("userId"));
-            if (user == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong user Id");
-            }
+            ArrayList <Product> products = database.getUserBoughtProduct((String) requestBody.get("userId"));
 
             ArrayList <HashMap> userBoughtList = new ArrayList<>();
-
-            ArrayList <Purchase> purchases = database.getUserPurchases(user.getId());
-
-            for (Purchase purchase : purchases) {
-                userBoughtList.add(database.findProductById(purchase.getProductId()).toHashMapProduct());
+            for (Product product : products) {
+                HashMap <String,Object> productForResponse = new HashMap<>();
+                productForResponse.put("name", product.getName());
+                productForResponse.put("price",product.getPrice());
+                userBoughtList.add(productForResponse);
             }
 
             return new SuccessfulResponseArray("200 OK", userBoughtList);
@@ -352,18 +348,16 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-            String idProduct = (String) requestBody.get("idProduct");
-            Product product = database.findProductById(idProduct);
-            if (product == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
-            }
 
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
-            ArrayList <Purchase> purchases = database.getProductPurchases(product.getId());
+            ArrayList <User> users = database.getProductСustomers((String) requestBody.get("productId"));
 
-            for (Purchase purchase : purchases) {
-                userBuy.add(database.findUserById(purchase.getUserId()).toHashMapUser());
+            for (User user: users) {
+                HashMap <String,String> userAsHashMap = new HashMap<>();
+                userAsHashMap.put("firstName",user.getFirstName());
+                userAsHashMap.put("lastName",user.getLastName());
+                userBuy.add(userAsHashMap);
             }
 
             return new SuccessfulResponseArray("200 OK", userBuy);
