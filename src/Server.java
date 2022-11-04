@@ -325,7 +325,7 @@ public class Server {
     public Response cmdListUsersProduct(Request objRequest) {
 
 
-        if (objRequest.getQueryString().hashCode() == 0) {
+        if (!objRequest.getQueryString().containsKey("userId")) {
             return new UnsuccessfulResponse("400 Bad Request", "Request haven't queryString");
         }
         ArrayList<Product> products = database.getUserBoughtProduct((String) objRequest.getQueryString().get("userId"));
@@ -343,7 +343,7 @@ public class Server {
 
     public Response cmdListProductUsers(Request objRequest) {
 
-        if (objRequest.getQueryString().hashCode() == 0) {
+        if (!objRequest.getQueryString().containsKey("productId")) {
             return new UnsuccessfulResponse("400 Bad Request", "Request haven't queryString");
         }
 
