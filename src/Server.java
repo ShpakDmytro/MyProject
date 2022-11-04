@@ -327,7 +327,7 @@ public class Server {
 
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
-            ArrayList <Product> products = database.getUserPurchases((String) requestBody.get("userId"));
+            ArrayList <Product> products = database.getUserBoughtProduct((String) requestBody.get("userId"));
 
             if (products.size() < 1) {
                 return new UnsuccessfulResponse("400 Bad Request", "User haven`t buy");
@@ -355,7 +355,7 @@ public class Server {
 
             ArrayList <HashMap> userBuy = new ArrayList<>();
 
-            ArrayList <User> users = database.getProductPurchases((String) requestBody.get("productId"));
+            ArrayList <User> users = database.getProductСustomers((String) requestBody.get("productId"));
             if (users.size() < 1) {
                 return new UnsuccessfulResponse("400 Bad Request", "Product haven`t user");
             }

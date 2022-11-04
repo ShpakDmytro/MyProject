@@ -295,7 +295,7 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList <User> getProductPurchases (String productId) {
+    public ArrayList <User> getProductСustomers(String productId) {
         Connection connection = createConnection();
         ArrayList <User> users = new ArrayList<>();
         try {
@@ -318,7 +318,7 @@ public class Database {
             }
         }
     }
-    public ArrayList<Product> getUserPurchases(String userId) {
+    public ArrayList<Product> getUserBoughtProduct(String userId) {
         Connection connection = createConnection();
         ArrayList <Product> products = new ArrayList<>();
         try {
