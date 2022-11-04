@@ -326,7 +326,7 @@ public class Server {
 
 
         if (!objRequest.getQueryString().containsKey("userId")) {
-            return new UnsuccessfulResponse("400 Bad Request", "Request haven't queryString");
+            return new UnsuccessfulResponse("400 Bad Request", "userID is required");
         }
         ArrayList<Product> products = database.getUserBoughtProduct((String) objRequest.getQueryString().get("userId"));
 
@@ -344,7 +344,7 @@ public class Server {
     public Response cmdListProductUsers(Request objRequest) {
 
         if (!objRequest.getQueryString().containsKey("productId")) {
-            return new UnsuccessfulResponse("400 Bad Request", "Request haven't queryString");
+            return new UnsuccessfulResponse("400 Bad Request", "productId is required");
         }
 
         ArrayList<HashMap> userBuy = new ArrayList<>();
