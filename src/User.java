@@ -26,7 +26,7 @@ public class User {
         this.confirmationCode = UUID.randomUUID().toString();
     }
 
-    //reconstraction User from bd
+    //reconstruction User from bd
     public User(String id, String firstName, String lastName, double amount,
                 String login, String password, String accessToken, String status, String confirmationCode) {
         this.id = id;
@@ -40,10 +40,6 @@ public class User {
         this.confirmationCode = confirmationCode;
     }
 
-    public User (String firstName, String lastName) {
-        this.firstName = firstName;
-        this.lastName = lastName;
-    }
     public String getId() {
         return id;
     }

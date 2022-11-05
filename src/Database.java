@@ -1,9 +1,11 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Database {
 
-    public Database() {}
+    public Database() {
+    }
 
     private Connection createConnection() {
 
@@ -69,7 +71,7 @@ public class Database {
         Connection connection = createConnection();
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, userId, productId) VALUES (?,?,?)");
-            stmt.setString(1,purchase.getId());
+            stmt.setString(1, purchase.getId());
             stmt.setString(2, purchase.getUserId());
             stmt.setString(3, purchase.getProductId());
             stmt.execute();
@@ -242,12 +244,73 @@ public class Database {
         return null;
     }
 
-    ArrayList<User> getAllUser() {
+    ArrayList<User> findUsers(HashMap<String, String> criteria) {
         ArrayList<User> usersForResponse = new ArrayList<>();
+        ArrayList<String> preparedStatementValues = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
+            String sqlQuery = "SELECT * FROM users WHERE ";
+            if (criteria.isEmpty()) {
+                sqlQuery = "SELECT * FROM users";
+
+            }
+            if (criteria.containsKey("productId")) {
+                sqlQuery = "SELECT * FROM users JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
+                preparedStatementValues.add(criteria.get("productId"));
+            }
+            if (criteria.containsKey("firstName")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND firstName = ?" : " firstName = ?";
+                preparedStatementValues.add(criteria.get("firstName"));
+
+            }
+            if (criteria.containsKey("lastName")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND lastName = ?" : " lastName = ?";
+                preparedStatementValues.add(criteria.get("lastName"));
+
+            }
+            if (criteria.containsKey("amount")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND amount = ?" : " amount = ?";
+                preparedStatementValues.add(criteria.get("amount"));
+
+            }
+            if (criteria.containsKey("login")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND login = ?" : " login = ?";
+                preparedStatementValues.add(criteria.get("login"));
+
+            }
+            if (criteria.containsKey("password")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND password = ?" : " password = ?";
+                preparedStatementValues.add(criteria.get("password"));
+
+            }
+            if (criteria.containsKey("accessToken")) {
+
+                if (criteria.get("accessToken").equals("null")) {
+                    sqlQuery += sqlQuery.contains("=") ? " AND accessToken IS NULL" : "accessToken IS NULL";
+
+                } else {
+                    sqlQuery += sqlQuery.contains("=") ? " AND accessToken = ?" : " accessToken = ?";
+                    preparedStatementValues.add(criteria.get("accessToken"));
+                }
+
+            }
+            if (criteria.containsKey("status")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND status = ?" : " status = ?";
+                preparedStatementValues.add(criteria.get("status"));
+
+            }
+            if (criteria.containsKey("confirmationCode")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND confirmationCode = ?" : " confirmationCode = ?";
+                preparedStatementValues.add(criteria.get("confirmationCode"));
+
+            }
+
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+
+            for (int i = 0; i < preparedStatementValues.size(); i++) {
+                statement.setString(i + 1, preparedStatementValues.get(i));
+            }
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -265,17 +328,44 @@ public class Database {
         } finally {
             try {
                 connection.close();
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
         }
         return usersForResponse;
     }
 
-    ArrayList<Product> getAllProduct() {
+    ArrayList<Product> findProducts(HashMap<String, String> criteria) {
         ArrayList<Product> productsForResponse = new ArrayList<>();
+        ArrayList<String> preparedStatementValues = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM products");
+            String sqlQuery = "SELECT * FROM products WHERE ";
+            if (criteria.isEmpty()) {
+                sqlQuery = "SELECT * FROM products";
+
+            }
+            if (criteria.containsKey("userId")) {
+                sqlQuery = "SELECT * FROM products JOIN purchases ON products.id = purchases.productId WHERE userId = ?";
+                preparedStatementValues.add(criteria.get("userId"));
+
+            }
+            if (criteria.containsKey("name")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND name = ?" : " name = ?";
+                preparedStatementValues.add(criteria.get("name"));
+
+            }
+            if (criteria.containsKey("price")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND price = ?" : " price = ?";
+                preparedStatementValues.add(criteria.get("price"));
+
+            }
+
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
+
+            for (int i = 0; i < preparedStatementValues.size(); i++) {
+                statement.setString(i + 1, preparedStatementValues.get(i));
+            }
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -290,55 +380,10 @@ public class Database {
         } finally {
             try {
                 connection.close();
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
         }
         return productsForResponse;
     }
 
-    public ArrayList <User> getProductUsers(String productId) {
-        Connection connection = createConnection();
-        ArrayList <User> users = new ArrayList<>();
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT users.firstName,users.lastName FROM purchases JOIN users ON users.id = purchases.userId WHERE purchases.productId = ?");
-            statement.setString(1, productId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-
-                User user =  new User (resultSet.getString("firstName"),
-                                       resultSet.getString("lastName"));
-                users.add(user);
-            }
-            return users;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
-    public ArrayList<Product> getUserBoughtProduct(String userId) {
-        Connection connection = createConnection();
-        ArrayList <Product> products = new ArrayList<>();
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT products.name,products.price FROM purchases JOIN products ON products.id = purchases.productId WHERE purchases.userId = ?");
-            statement.setString(1, userId);
-            ResultSet resultSet = statement.executeQuery();
-
-            while (resultSet.next()) {
-                Product product =  new Product(resultSet.getString("name"),
-                                               resultSet.getDouble("price"));
-                products.add(product);
-            }
-            return products;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
 }

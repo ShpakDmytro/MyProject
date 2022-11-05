@@ -8,7 +8,6 @@ public class Request {
     private String body;
     private String endpoint;
     private ArrayList <HTTPHeader> headers;
-
     private HashMap <String,String> queryString;
 
     public Request(String method, String command, String body,ArrayList <HTTPHeader> headers, HashMap <String,String> queryString ){
