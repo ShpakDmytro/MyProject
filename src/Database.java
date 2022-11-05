@@ -4,7 +4,8 @@ import java.util.HashMap;
 
 public class Database {
 
-    public Database() {}
+    public Database() {
+    }
 
     private Connection createConnection() {
 
@@ -70,7 +71,7 @@ public class Database {
         Connection connection = createConnection();
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, userId, productId) VALUES (?,?,?)");
-            stmt.setString(1,purchase.getId());
+            stmt.setString(1, purchase.getId());
             stmt.setString(2, purchase.getUserId());
             stmt.setString(3, purchase.getProductId());
             stmt.execute();
@@ -243,64 +244,72 @@ public class Database {
         return null;
     }
 
-    ArrayList<User> getAllAboutUser(HashMap<String,String> criteria) {
+    ArrayList<User> findUsers(HashMap<String, String> criteria) {
         ArrayList<User> usersForResponse = new ArrayList<>();
-        ArrayList <String> criteriaForSearch = new ArrayList<>();
+        ArrayList<String> preparedStatementValues = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            String sqlRequest = "SELECT * FROM users WHERE ";
-            if (criteria.isEmpty()){
-                sqlRequest = "SELECT * FROM users";
-            } if (criteria.containsKey("firstName")){
-                sqlRequest += "firstName = ?";
-                criteriaForSearch.add(criteria.get("firstName"));
+            String sqlQuery = "SELECT * FROM users WHERE ";
+            if (criteria.isEmpty()) {
+                sqlQuery = "SELECT * FROM users";
 
-            } if (criteria.containsKey("lastName")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND lastName = ?" : " lastName = ?";
-                criteriaForSearch.add(criteria.get("lastName"));
+            }
+            if (criteria.containsKey("firstName")) {
+                sqlQuery += "firstName = ?";
+                preparedStatementValues.add(criteria.get("firstName"));
 
-            } if (criteria.containsKey("amount")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND amount = ?" : " amount = ?";
-                criteriaForSearch.add(criteria.get("amount"));
+            }
+            if (criteria.containsKey("lastName")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND lastName = ?" : " lastName = ?";
+                preparedStatementValues.add(criteria.get("lastName"));
 
-            } if (criteria.containsKey("login")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND login = ?" : " login = ?";
-                criteriaForSearch.add(criteria.get("login"));
+            }
+            if (criteria.containsKey("amount")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND amount = ?" : " amount = ?";
+                preparedStatementValues.add(criteria.get("amount"));
 
-            } if (criteria.containsKey("password")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND password = ?" : " password = ?";
-                criteriaForSearch.add(criteria.get("password"));
+            }
+            if (criteria.containsKey("login")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND login = ?" : " login = ?";
+                preparedStatementValues.add(criteria.get("login"));
 
-            } if (criteria.containsKey("accessToken")){
+            }
+            if (criteria.containsKey("password")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND password = ?" : " password = ?";
+                preparedStatementValues.add(criteria.get("password"));
 
-                if (criteria.get("accessToken").equals("null")){
-                    sqlRequest += (sqlRequest.contains("=")) ? " AND accessToken IS NULL" : "accessToken IS NULL";
+            }
+            if (criteria.containsKey("accessToken")) {
+
+                if (criteria.get("accessToken").equals("null")) {
+                    sqlQuery += (sqlQuery.contains("=")) ? " AND accessToken IS NULL" : "accessToken IS NULL";
 
                 } else {
-                    sqlRequest += (sqlRequest.contains("=")) ? " AND accessToken = ?" : " accessToken = ?";
-                    criteriaForSearch.add(criteria.get("accessToken"));
+                    sqlQuery += (sqlQuery.contains("=")) ? " AND accessToken = ?" : " accessToken = ?";
+                    preparedStatementValues.add(criteria.get("accessToken"));
                 }
 
-            } if (criteria.containsKey("status")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND status = ?" : " status = ?";
-                criteriaForSearch.add(criteria.get("status"));
-
-            } if (criteria.containsKey("confirmationCode")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND confirmationCode = ?" : " confirmationCode = ?";
-                criteriaForSearch.add(criteria.get("confirmationCode"));
             }
-            if (criteria.containsKey("productId")){
-                sqlRequest = "SELECT users.id, users.firstName, users.lastName, users.amount, users.login, users.password, " +
-                        "users.accessToken, users.status, users.confirmationCode FROM purchases JOIN users ON " +
-                        "users.id = purchases.userId WHERE purchases.productId = ?";
-                criteriaForSearch.add(criteria.get("productId"));
+            if (criteria.containsKey("status")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND status = ?" : " status = ?";
+                preparedStatementValues.add(criteria.get("status"));
+
+            }
+            if (criteria.containsKey("confirmationCode")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND confirmationCode = ?" : " confirmationCode = ?";
+                preparedStatementValues.add(criteria.get("confirmationCode"));
+
+            }
+            if (criteria.containsKey("productId")) {
+                sqlQuery = "SELECT * FROM users JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
+                preparedStatementValues.add(criteria.get("productId"));
             }
 
-            PreparedStatement statement = connection.prepareStatement(sqlRequest);
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
-            for (int i = 0; i < criteriaForSearch.size() ; i++) {
-                statement.setString(i+1,criteriaForSearch.get(i));
+            for (int i = 0; i < preparedStatementValues.size(); i++) {
+                statement.setString(i + 1, preparedStatementValues.get(i));
             }
 
             ResultSet resultSet = statement.executeQuery();
@@ -319,43 +328,43 @@ public class Database {
         } finally {
             try {
                 connection.close();
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
         }
         return usersForResponse;
     }
 
-    ArrayList<Product> getAllAboutProduct(HashMap<String,String> criteria) {
+    ArrayList<Product> findProducts(HashMap<String, String> criteria) {
         ArrayList<Product> productsForResponse = new ArrayList<>();
-        ArrayList <String> criteriaForSearch = new ArrayList<>();
+        ArrayList<String> preparedStatementValues = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            String sqlRequest = "SELECT * FROM products WHERE ";
-            if (criteria.isEmpty()){
-                sqlRequest = "SELECT * FROM products";
+            String sqlQuery = "SELECT * FROM products WHERE ";
+            if (criteria.isEmpty()) {
+                sqlQuery = "SELECT * FROM products";
 
             }
-            if (criteria.containsKey("name")){
-                sqlRequest +=  " name = ?";
-                criteriaForSearch.add(criteria.get("name"));
+            if (criteria.containsKey("name")) {
+                sqlQuery += " name = ?";
+                preparedStatementValues.add(criteria.get("name"));
 
             }
-            if (criteria.containsKey("price")){
-                sqlRequest += (sqlRequest.contains("=")) ? " AND price = ?" : " price = ?";
-                criteriaForSearch.add(criteria.get("price"));
+            if (criteria.containsKey("price")) {
+                sqlQuery += (sqlQuery.contains("=")) ? " AND price = ?" : " price = ?";
+                preparedStatementValues.add(criteria.get("price"));
 
             }
-            if (criteria.containsKey("userId")){
-                sqlRequest = "SELECT products.id, products.name, products.price FROM purchases JOIN products " +
-                        "ON products.id = purchases.productId WHERE userId = ?";
-                criteriaForSearch.add(criteria.get("userId"));
+            if (criteria.containsKey("userId")) {
+                sqlQuery = "SELECT * FROM products JOIN purchases ON products.id = purchases.productId WHERE userId = ?";
+                preparedStatementValues.add(criteria.get("userId"));
 
             }
 
-            PreparedStatement statement = connection.prepareStatement(sqlRequest);
+            PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
-            for (int i = 0; i < criteriaForSearch.size() ; i++) {
-                statement.setString(i+1,criteriaForSearch.get(i));
+            for (int i = 0; i < preparedStatementValues.size(); i++) {
+                statement.setString(i + 1, preparedStatementValues.get(i));
             }
 
             ResultSet resultSet = statement.executeQuery();
@@ -371,7 +380,8 @@ public class Database {
         } finally {
             try {
                 connection.close();
-            } catch (SQLException ignored) {}
+            } catch (SQLException ignored) {
+            }
         }
         return productsForResponse;
     }

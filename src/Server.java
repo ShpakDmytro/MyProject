@@ -264,7 +264,7 @@ public class Server {
 
         if (objRequest.getQueryString().isEmpty()) {
 
-            ArrayList<User> allUsers = database.getAllAboutUser(objRequest.getQueryString());
+            ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
             ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
             for (User user : allUsers) {
                 allUsersForResponse.add(user.toHashMapUser());
@@ -284,9 +284,9 @@ public class Server {
                 throw new RuntimeException(e);
             }
 
-        } else if (!objRequest.getQueryString().isEmpty()){
+        } else if (!objRequest.getQueryString().isEmpty()) {
 
-            ArrayList<User> allUsers = database.getAllAboutUser(objRequest.getQueryString());
+            ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
             ArrayList<HashMap> usersForResponse = new ArrayList<>();
             for (User user : allUsers) {
                 usersForResponse.add(user.toHashMapUser());
@@ -294,13 +294,13 @@ public class Server {
             return new SuccessfulResponseArray("200 OK", usersForResponse);
         }
 
-       return  new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
+        return new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
     }
 
     public Response cmdAllAboutProducts(Request objRequest) {
 
         if (objRequest.getQueryString().isEmpty()) {
-            ArrayList<Product> allProduct = database.getAllAboutProduct(objRequest.getQueryString());
+            ArrayList<Product> allProduct = database.findProducts(objRequest.getQueryString());
             ArrayList<HashMap> allProductForResponse = new ArrayList<>();
             for (Product product : allProduct) {
                 allProductForResponse.add(product.toHashMapProduct());
@@ -319,16 +319,16 @@ public class Server {
             } catch (JsonProcessingException e) {
                 throw new RuntimeException(e);
             }
-        } else if (!objRequest.getQueryString().isEmpty()){
+        } else if (!objRequest.getQueryString().isEmpty()) {
 
-            ArrayList<Product> allProducts = database.getAllAboutProduct(objRequest.getQueryString());
+            ArrayList<Product> allProducts = database.findProducts(objRequest.getQueryString());
             ArrayList<HashMap> productsForResponse = new ArrayList<>();
             for (Product product : allProducts) {
                 productsForResponse.add(product.toHashMapProduct());
             }
             return new SuccessfulResponseArray("200 OK", productsForResponse);
         }
-        return  new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
+        return new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
     }
 
     public Response cmdBuyProduct(Request objRequest) {
