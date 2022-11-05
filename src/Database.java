@@ -305,7 +305,6 @@ public class Database {
                 preparedStatementValues.add(criteria.get("confirmationCode"));
 
             }
-            System.out.println(sqlQuery);
 
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
