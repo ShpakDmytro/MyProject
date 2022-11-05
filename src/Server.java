@@ -122,19 +122,13 @@ public class Server {
                 response = cmdNewProduct(objRequest);
 
             } else if (objRequest.getEndpoint().equals("GET /users")) {
-                response = cmdListUsers();
+                response = cmdAllAboutUsers(objRequest);
 
             } else if (objRequest.getEndpoint().equals("GET /products")) {
-                response = cmdListProducts();
+                response = cmdAllAboutProducts(objRequest);
 
             } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
                 response = cmdBuyProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("GET /user-products")) {
-                response = cmdListUsersProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("GET /product-users")) {
-                response = cmdListProductUsers(objRequest);
 
             } else {
                 response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
@@ -266,26 +260,75 @@ public class Server {
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
     }
 
-    public Response cmdListUsers() {
+    public Response cmdAllAboutUsers(Request objRequest) {
 
-        ArrayList<User> allUsers = database.getAllUser();
-        ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
-        for (User user : allUsers) {
-            allUsersForResponse.add(user.toHashMapUser());
+        if (objRequest.getQueryString().isEmpty()) {
+
+            ArrayList<User> allUsers = database.getAllAboutUser(objRequest.getQueryString());
+            ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
+            for (User user : allUsers) {
+                allUsersForResponse.add(user.toHashMapUser());
+            }
+            return new SuccessfulResponseArray("200 OK", allUsersForResponse);
+
+        } else if (objRequest.getQueryString().containsKey("userId")) {
+            ObjectMapper mapper = new ObjectMapper();
+            User user = database.findUserById((String) objRequest.getQueryString().get("userId"));
+            if (user == null) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
+            }
+            try {
+                String bodyResponse = mapper.writeValueAsString(user.toHashMapUser());
+                return new SuccessfulResponseMessage("200 OK", bodyResponse);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+
+        } else if (!objRequest.getQueryString().isEmpty()){
+
+            ArrayList<User> allUsers = database.getAllAboutUser(objRequest.getQueryString());
+            ArrayList<HashMap> usersForResponse = new ArrayList<>();
+            for (User user : allUsers) {
+                usersForResponse.add(user.toHashMapUser());
+            }
+            return new SuccessfulResponseArray("200 OK", usersForResponse);
         }
 
-        return new SuccessfulResponseArray("200 OK", allUsersForResponse);
+       return  new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
     }
 
-    public Response cmdListProducts() {
+    public Response cmdAllAboutProducts(Request objRequest) {
 
-        ArrayList<Product> allProduct = database.getAllProduct();
-        ArrayList<HashMap> allProductForResponse = new ArrayList<>();
-        for (Product product : allProduct) {
-            allProductForResponse.add(product.toHashMapProduct());
+        if (objRequest.getQueryString().isEmpty()) {
+            ArrayList<Product> allProduct = database.getAllAboutProduct(objRequest.getQueryString());
+            ArrayList<HashMap> allProductForResponse = new ArrayList<>();
+            for (Product product : allProduct) {
+                allProductForResponse.add(product.toHashMapProduct());
+            }
+
+            return new SuccessfulResponseArray("200 OK", allProductForResponse);
+        } else if (objRequest.getQueryString().containsKey("productId")) {
+            ObjectMapper mapper = new ObjectMapper();
+            Product product = database.findProductById((String) objRequest.getQueryString().get("productId"));
+            if (product == null) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
+            }
+            try {
+                String bodyResponse = mapper.writeValueAsString(product.toHashMapProduct());
+                return new SuccessfulResponseMessage("200 OK", bodyResponse);
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (!objRequest.getQueryString().isEmpty()){
+
+            ArrayList<Product> allProducts = database.getAllAboutProduct(objRequest.getQueryString());
+            ArrayList<HashMap> productsForResponse = new ArrayList<>();
+            for (Product product : allProducts) {
+                productsForResponse.add(product.toHashMapProduct());
+            }
+            return new SuccessfulResponseArray("200 OK", productsForResponse);
         }
-
-        return new SuccessfulResponseArray("200 OK", allProductForResponse);
+        return  new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
     }
 
     public Response cmdBuyProduct(Request objRequest) {
@@ -322,42 +365,4 @@ public class Server {
         }
     }
 
-    public Response cmdListUsersProduct(Request objRequest) {
-
-
-        if (!objRequest.getQueryString().containsKey("userId")) {
-            return new UnsuccessfulResponse("400 Bad Request", "userID is required");
-        }
-        ArrayList<Product> products = database.getUserBoughtProduct((String) objRequest.getQueryString().get("userId"));
-
-        ArrayList<HashMap> userBoughtList = new ArrayList<>();
-        for (Product product : products) {
-            HashMap<String, Object> productForResponse = new HashMap<>();
-            productForResponse.put("name", product.getName());
-            productForResponse.put("price", product.getPrice());
-            userBoughtList.add(productForResponse);
-        }
-
-        return new SuccessfulResponseArray("200 OK", userBoughtList);
-    }
-
-    public Response cmdListProductUsers(Request objRequest) {
-
-        if (!objRequest.getQueryString().containsKey("productId")) {
-            return new UnsuccessfulResponse("400 Bad Request", "productId is required");
-        }
-
-        ArrayList<HashMap> userBuy = new ArrayList<>();
-
-        ArrayList<User> users = database.getProductUsers((String) objRequest.getQueryString().get("productId"));
-
-        for (User user : users) {
-            HashMap<String, String> userAsHashMap = new HashMap<>();
-            userAsHashMap.put("firstName", user.getFirstName());
-            userAsHashMap.put("lastName", user.getLastName());
-            userBuy.add(userAsHashMap);
-        }
-
-        return new SuccessfulResponseArray("200 OK", userBuy);
-    }
 }

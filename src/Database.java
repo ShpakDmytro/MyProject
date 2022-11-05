@@ -1,5 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Database {
 
@@ -242,12 +243,60 @@ public class Database {
         return null;
     }
 
-    ArrayList<User> getAllUser() {
+    ArrayList<User> getAllAboutUser(HashMap<String,String> criteria) {
         ArrayList<User> usersForResponse = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM users");
+            String sqlRequest = "SELECT * FROM users WHERE ";
+            if (criteria.isEmpty()){
+                sqlRequest = "SELECT * FROM users";
+            } if (criteria.containsKey("firstName")){
+                sqlRequest += "firstName = '" + criteria.get("firstName") + "'";
+
+            } if (criteria.containsKey("lastName")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND lastName = '" + criteria.get("lastName") + "'" :
+                        " lastName = '" + criteria.get("lastName") + "'";
+
+            } if (criteria.containsKey("amount")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND amount = '" + criteria.get("amount") + "'" :
+                        " amount = '" + criteria.get("amount") + "'";
+
+            } if (criteria.containsKey("login")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND login = '" + criteria.get("login") + "'" :
+                        " login = '" + criteria.get("login") + "'";
+
+            } if (criteria.containsKey("password")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND password = '" + criteria.get("password") + "'" :
+                        " password = '" + criteria.get("password") + "'";
+
+            } if (criteria.containsKey("accessToken")){
+
+                if (criteria.get("accessToken").equals("null")){
+                    sqlRequest += (sqlRequest.contains("=")) ? " AND accessToken IS NULL" : "accessToken IS NULL;";
+
+                } else {
+                    sqlRequest += (sqlRequest.contains("=")) ? " AND accessToken = '" + criteria.get("accessToken") + "'" :
+                            " accessToken = '" + criteria.get("accessToken") + "'";
+                }
+
+            } if (criteria.containsKey("status")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND status = '" + criteria.get("status") + "'" :
+                        " status = '" + criteria.get("status") + "'";
+
+            } if (criteria.containsKey("confirmationCode")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND confirmationCode = '" + criteria.get("confirmationCode") + "'" :
+                        " confirmationCode = '" + criteria.get("confirmationCode") + "'";
+
+            }
+            if (criteria.containsKey("productId")){
+                sqlRequest = "SELECT users.id, users.firstName, users.lastName, users.amount, users.login, users.password, " +
+                        "users.accessToken, users.status, users.confirmationCode FROM purchases JOIN users ON " +
+                        "users.id = purchases.userId WHERE purchases.productId = '"+criteria.get("productId")+"'";
+            }
+
+
+            PreparedStatement statement = connection.prepareStatement(sqlRequest);
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -270,12 +319,31 @@ public class Database {
         return usersForResponse;
     }
 
-    ArrayList<Product> getAllProduct() {
+    ArrayList<Product> getAllAboutProduct(HashMap<String,String> criteria) {
         ArrayList<Product> productsForResponse = new ArrayList<>();
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT * FROM products");
+            String sqlRequest = "SELECT * FROM products WHERE ";
+            if (criteria.isEmpty()){
+                sqlRequest = "SELECT * FROM products";
+
+            }
+            if (criteria.containsKey("name")){
+                sqlRequest +=  " name = '" + criteria.get("name") + "'";
+
+            }
+            if (criteria.containsKey("price")){
+                sqlRequest += (sqlRequest.contains("=")) ? " AND price = '" + criteria.get("price") + "'" :
+                        " price = '" + criteria.get("price") + "'";
+
+            }
+            if (criteria.containsKey("userId")){
+                sqlRequest = "SELECT products.id, products.name, products.price FROM purchases JOIN products " +
+                        "ON products.id = purchases.productId WHERE userId = '" + criteria.get("userId")+ "'";
+            }
+
+            PreparedStatement statement = connection.prepareStatement(sqlRequest);
 
             ResultSet resultSet = statement.executeQuery();
 
@@ -295,29 +363,6 @@ public class Database {
         return productsForResponse;
     }
 
-    public ArrayList <User> getProductUsers(String productId) {
-        Connection connection = createConnection();
-        ArrayList <User> users = new ArrayList<>();
-        try {
-            PreparedStatement statement = connection.prepareStatement("SELECT users.firstName,users.lastName FROM purchases JOIN users ON users.id = purchases.userId WHERE purchases.productId = ?");
-            statement.setString(1, productId);
-            ResultSet resultSet = statement.executeQuery();
-            while (resultSet.next()) {
-
-                User user =  new User (resultSet.getString("firstName"),
-                                       resultSet.getString("lastName"));
-                users.add(user);
-            }
-            return users;
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        } finally {
-            try {
-                connection.close();
-            } catch (SQLException ignored) {
-            }
-        }
-    }
     public ArrayList<Product> getUserBoughtProduct(String userId) {
         Connection connection = createConnection();
         ArrayList <Product> products = new ArrayList<>();
