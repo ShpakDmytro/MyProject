@@ -74,7 +74,7 @@ public class User {
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
-        } else throw new Exception("You haven`t enough money");
+        } else throw new NotEnoughMoneyException("You haven`t enough money");
     }
 
     boolean compareConfirmationCode(String code) {

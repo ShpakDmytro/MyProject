@@ -307,16 +307,17 @@ public class Server {
         }
 
         try {
-            database.startTransaction();
             user.buyProduct(product);
+            database.startTransaction();
             database.updateUser(user);
             database.insertPurchase(new Purchase(UUID.randomUUID().toString(), user.getId(), product.getId()));
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
+        } catch (NotEnoughMoneyException exception){
+            return new UnsuccessfulResponse("400 Bad Request", "User don`t have enough money");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("400 Bad Request", "Something wrong");
+            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
-
 }
