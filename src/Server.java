@@ -122,10 +122,10 @@ public class Server {
                 response = cmdNewProduct(objRequest);
 
             } else if (objRequest.getEndpoint().equals("GET /users")) {
-                response = cmdAllAboutUsers(objRequest);
+                response = cmdFindUsers(objRequest);
 
             } else if (objRequest.getEndpoint().equals("GET /products")) {
-                response = cmdAllAboutProducts(objRequest);
+                response = cmdFindProducts(objRequest);
 
             } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
                 response = cmdBuyProduct(objRequest);
@@ -260,75 +260,26 @@ public class Server {
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
     }
 
-    public Response cmdAllAboutUsers(Request objRequest) {
+    public Response cmdFindUsers(Request objRequest) {
 
-        if (objRequest.getQueryString().isEmpty()) {
-
-            ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
-            ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
-            for (User user : allUsers) {
-                allUsersForResponse.add(user.toHashMapUser());
-            }
-            return new SuccessfulResponseArray("200 OK", allUsersForResponse);
-
-        } else if (objRequest.getQueryString().containsKey("userId")) {
-            ObjectMapper mapper = new ObjectMapper();
-            User user = database.findUserById((String) objRequest.getQueryString().get("userId"));
-            if (user == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
-            }
-            try {
-                String bodyResponse = mapper.writeValueAsString(user.toHashMapUser());
-                return new SuccessfulResponseMessage("200 OK", bodyResponse);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-
-        } else if (!objRequest.getQueryString().isEmpty()) {
-
-            ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
-            ArrayList<HashMap> usersForResponse = new ArrayList<>();
-            for (User user : allUsers) {
-                usersForResponse.add(user.toHashMapUser());
-            }
-            return new SuccessfulResponseArray("200 OK", usersForResponse);
+        ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
+        ArrayList<HashMap> allUsersForResponse = new ArrayList<>();
+        for (User user : allUsers) {
+            allUsersForResponse.add(user.toHashMapUser());
         }
+        return new SuccessfulResponseArray("200 OK", allUsersForResponse);
 
-        return new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
     }
 
-    public Response cmdAllAboutProducts(Request objRequest) {
+    public Response cmdFindProducts(Request objRequest) {
 
-        if (objRequest.getQueryString().isEmpty()) {
-            ArrayList<Product> allProduct = database.findProducts(objRequest.getQueryString());
-            ArrayList<HashMap> allProductForResponse = new ArrayList<>();
-            for (Product product : allProduct) {
-                allProductForResponse.add(product.toHashMapProduct());
-            }
-
-            return new SuccessfulResponseArray("200 OK", allProductForResponse);
-        } else if (objRequest.getQueryString().containsKey("productId")) {
-            ObjectMapper mapper = new ObjectMapper();
-            Product product = database.findProductById((String) objRequest.getQueryString().get("productId"));
-            if (product == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
-            }
-            try {
-                String bodyResponse = mapper.writeValueAsString(product.toHashMapProduct());
-                return new SuccessfulResponseMessage("200 OK", bodyResponse);
-            } catch (JsonProcessingException e) {
-                throw new RuntimeException(e);
-            }
-        } else if (!objRequest.getQueryString().isEmpty()) {
-
-            ArrayList<Product> allProducts = database.findProducts(objRequest.getQueryString());
-            ArrayList<HashMap> productsForResponse = new ArrayList<>();
-            for (Product product : allProducts) {
-                productsForResponse.add(product.toHashMapProduct());
-            }
-            return new SuccessfulResponseArray("200 OK", productsForResponse);
+        ArrayList<Product> allProduct = database.findProducts(objRequest.getQueryString());
+        ArrayList<HashMap> allProductForResponse = new ArrayList<>();
+        for (Product product : allProduct) {
+            allProductForResponse.add(product.toHashMapProduct());
         }
-        return new UnsuccessfulResponse("400 Bad Request", "Wrong search criteria");
+
+        return new SuccessfulResponseArray("200 OK", allProductForResponse);
     }
 
     public Response cmdBuyProduct(Request objRequest) {
@@ -356,9 +307,11 @@ public class Server {
         }
 
         try {
+            database.startTransaction();
             user.buyProduct(product);
             database.updateUser(user);
             database.insertPurchase(new Purchase(UUID.randomUUID().toString(), user.getId(), product.getId()));
+            database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
             return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");

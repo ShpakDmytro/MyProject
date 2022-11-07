@@ -4,6 +4,8 @@ import java.util.HashMap;
 
 public class Database {
 
+    private Connection connect;
+
     public Database() {
     }
 
@@ -68,7 +70,13 @@ public class Database {
 
     public void insertPurchase(Purchase purchase) {
 
-        Connection connection = createConnection();
+        Connection connection;
+        if (this.connect == null) {
+            connection = createConnection();
+        } else {
+            connection = connect;
+        }
+
         try {
             PreparedStatement stmt = connection.prepareStatement("INSERT INTO purchases (id, userId, productId) VALUES (?,?,?)");
             stmt.setString(1, purchase.getId());
@@ -81,15 +89,21 @@ public class Database {
             throw new RuntimeException(e);
         } finally {
             try {
-                connection.close();
+                if (connect == null) {
+                    connection.close();
+                }
             } catch (SQLException ignored) {
             }
         }
     }
 
     void updateUser(User user) {
-
-        Connection connection = createConnection();
+        Connection connection;
+        if (this.connect == null) {
+            connection = createConnection();
+        } else {
+            connection = connect;
+        }
 
         try {
             PreparedStatement stmt = connection.prepareStatement("UPDATE users SET id = ?, firstName = ?, lastName = ?, " +
@@ -111,7 +125,9 @@ public class Database {
             throw new RuntimeException(e);
         } finally {
             try {
-                connection.close();
+                if (connect == null) {
+                    connection.close();
+                }
             } catch (SQLException ignored) {
             }
         }
@@ -259,6 +275,9 @@ public class Database {
                 sqlQuery = "SELECT * FROM users JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
                 preparedStatementValues.add(criteria.get("productId"));
             }
+            if (criteria.containsKey("userId")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND userId = ?" : " id = ?";
+            }
             if (criteria.containsKey("firstName")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND firstName = ?" : " firstName = ?";
                 preparedStatementValues.add(criteria.get("firstName"));
@@ -350,6 +369,10 @@ public class Database {
                 preparedStatementValues.add(criteria.get("userId"));
 
             }
+            if (criteria.containsKey("productId")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND productId = ?" : " id = ?";
+
+            }
             if (criteria.containsKey("name")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND name = ?" : " name = ?";
                 preparedStatementValues.add(criteria.get("name"));
@@ -386,4 +409,23 @@ public class Database {
         return productsForResponse;
     }
 
+    public void startTransaction() {
+        this.connect = createConnection();
+        try {
+            PreparedStatement statement = connect.prepareStatement("START TRANSACTION;");
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void closeTransaction() {
+        try {
+            PreparedStatement statement = connect.prepareStatement("COMMIT");
+            statement.execute();
+            this.connect.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
