@@ -1,6 +1,7 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 
 public class Database {
 
@@ -272,55 +273,59 @@ public class Database {
 
             }
             if (criteria.containsKey("productId")) {
-                sqlQuery = "SELECT * FROM users JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
+                sqlQuery = "SELECT users.id, users.firstName, users.lastName, users.amount, users.login, users.password, " +
+                        "users.accessToken, users.status, users.confirmationCode FROM users " +
+                        "JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
                 preparedStatementValues.add(criteria.get("productId"));
             }
             if (criteria.containsKey("id")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND userId = ?" : " id = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.id = ?" : " id = ?";
+                preparedStatementValues.add(criteria.get("id"));
+
             }
             if (criteria.containsKey("firstName")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND firstName = ?" : " firstName = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.firstName = ?" : " firstName = ?";
                 preparedStatementValues.add(criteria.get("firstName"));
 
             }
             if (criteria.containsKey("lastName")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND lastName = ?" : " lastName = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.lastName = ?" : " lastName = ?";
                 preparedStatementValues.add(criteria.get("lastName"));
 
             }
             if (criteria.containsKey("amount")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND amount = ?" : " amount = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.amount = ?" : " amount = ?";
                 preparedStatementValues.add(criteria.get("amount"));
 
             }
             if (criteria.containsKey("login")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND login = ?" : " login = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.login = ?" : " login = ?";
                 preparedStatementValues.add(criteria.get("login"));
 
             }
             if (criteria.containsKey("password")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND password = ?" : " password = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.password = ?" : " password = ?";
                 preparedStatementValues.add(criteria.get("password"));
 
             }
             if (criteria.containsKey("accessToken")) {
 
                 if (criteria.get("accessToken").equals("null")) {
-                    sqlQuery += sqlQuery.contains("=") ? " AND accessToken IS NULL" : "accessToken IS NULL";
+                    sqlQuery += sqlQuery.contains("=") ? " AND users.accessToken IS NULL" : "accessToken IS NULL";
 
                 } else {
-                    sqlQuery += sqlQuery.contains("=") ? " AND accessToken = ?" : " accessToken = ?";
+                    sqlQuery += sqlQuery.contains("=") ? " AND users.accessToken = ?" : " accessToken = ?";
                     preparedStatementValues.add(criteria.get("accessToken"));
                 }
 
             }
             if (criteria.containsKey("status")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND status = ?" : " status = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.status = ?" : " status = ?";
                 preparedStatementValues.add(criteria.get("status"));
 
             }
             if (criteria.containsKey("confirmationCode")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND confirmationCode = ?" : " confirmationCode = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND users.confirmationCode = ?" : " confirmationCode = ?";
                 preparedStatementValues.add(criteria.get("confirmationCode"));
 
             }
@@ -365,21 +370,22 @@ public class Database {
 
             }
             if (criteria.containsKey("userId")) {
-                sqlQuery = "SELECT * FROM products JOIN purchases ON products.id = purchases.productId WHERE userId = ?";
+                sqlQuery = "SELECT products.id, products.name, products.price FROM products JOIN purchases ON " +
+                        "products.id = purchases.productId WHERE userId = ?";
                 preparedStatementValues.add(criteria.get("userId"));
 
             }
             if (criteria.containsKey("id")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND productId = ?" : " id = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND products.id = ?" : " id = ?";
 
             }
             if (criteria.containsKey("name")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND name = ?" : " name = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND products.name = ?" : " name = ?";
                 preparedStatementValues.add(criteria.get("name"));
 
             }
             if (criteria.containsKey("price")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND price = ?" : " price = ?";
+                sqlQuery += sqlQuery.contains("=") ? " AND products.price = ?" : " price = ?";
                 preparedStatementValues.add(criteria.get("price"));
 
             }
