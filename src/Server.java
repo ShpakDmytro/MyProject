@@ -314,7 +314,8 @@ public class Server {
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (Exception e) {
-            return new UnsuccessfulResponse("400 Bad Request", "You haven`t enough money");
+            database.rollback();
+            return new UnsuccessfulResponse("400 Bad Request", "Something wrong");
         }
     }
 

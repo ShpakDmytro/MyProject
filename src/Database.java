@@ -4,7 +4,7 @@ import java.util.HashMap;
 
 public class Database {
 
-    private Connection connect;
+    private Connection transactionConnection;
 
     public Database() {
     }
@@ -71,10 +71,10 @@ public class Database {
     public void insertPurchase(Purchase purchase) {
 
         Connection connection;
-        if (this.connect == null) {
+        if (this.transactionConnection == null) {
             connection = createConnection();
         } else {
-            connection = connect;
+            connection = transactionConnection;
         }
 
         try {
@@ -89,7 +89,7 @@ public class Database {
             throw new RuntimeException(e);
         } finally {
             try {
-                if (connect == null) {
+                if (transactionConnection == null) {
                     connection.close();
                 }
             } catch (SQLException ignored) {
@@ -99,10 +99,10 @@ public class Database {
 
     void updateUser(User user) {
         Connection connection;
-        if (this.connect == null) {
+        if (this.transactionConnection == null) {
             connection = createConnection();
         } else {
-            connection = connect;
+            connection = transactionConnection;
         }
 
         try {
@@ -125,7 +125,7 @@ public class Database {
             throw new RuntimeException(e);
         } finally {
             try {
-                if (connect == null) {
+                if (transactionConnection == null) {
                     connection.close();
                 }
             } catch (SQLException ignored) {
@@ -275,7 +275,7 @@ public class Database {
                 sqlQuery = "SELECT * FROM users JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
                 preparedStatementValues.add(criteria.get("productId"));
             }
-            if (criteria.containsKey("userId")) {
+            if (criteria.containsKey("id")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND userId = ?" : " id = ?";
             }
             if (criteria.containsKey("firstName")) {
@@ -369,7 +369,7 @@ public class Database {
                 preparedStatementValues.add(criteria.get("userId"));
 
             }
-            if (criteria.containsKey("productId")) {
+            if (criteria.containsKey("id")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND productId = ?" : " id = ?";
 
             }
@@ -410,9 +410,9 @@ public class Database {
     }
 
     public void startTransaction() {
-        this.connect = createConnection();
+        this.transactionConnection = createConnection();
         try {
-            PreparedStatement statement = connect.prepareStatement("START TRANSACTION;");
+            PreparedStatement statement = transactionConnection.prepareStatement("START TRANSACTION;");
             statement.execute();
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -421,9 +421,19 @@ public class Database {
 
     public void closeTransaction() {
         try {
-            PreparedStatement statement = connect.prepareStatement("COMMIT");
+            PreparedStatement statement = transactionConnection.prepareStatement("COMMIT");
             statement.execute();
-            this.connect.close();
+            this.transactionConnection.close();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public void rollback() {
+        try {
+            PreparedStatement statement = transactionConnection.prepareStatement("ROLLBACK");
+            statement.execute();
+            this.transactionConnection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
