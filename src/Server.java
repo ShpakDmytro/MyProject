@@ -74,9 +74,11 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
-
+        System.out.println(requestAsString);
         String method = requestAsString.split("\n")[0].split(" ")[0];
         String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
+        System.out.println(method);
+        System.out.println(command);
 
         String body = "";
 
@@ -84,7 +86,7 @@ public class Server {
             body = requestAsString.split("\n\n")[1];
         } catch (ArrayIndexOutOfBoundsException ignored) {
         }
-
+        System.out.println(body);
         if (requestAsString.split("\n")[0].contains("?")) {
             String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
             String[] querys = queryString.split("&");
@@ -130,7 +132,20 @@ public class Server {
             } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
                 response = cmdBuyProduct(objRequest);
 
-            } else {
+            } else if (objRequest.getEndpoint().equals("PATCH /product")) {
+                response = cmdPatchProduct(objRequest);
+            } else if (objRequest.getEndpoint().equals("PATCH /user")){
+                response = cmdPatchUser(objRequest);
+            } else if (objRequest.getEndpoint().equals("POST /forgot-password")){
+
+            }else if (objRequest.getEndpoint().equals("POST /forgot-password-finish")){
+
+            }else if (objRequest.getEndpoint().equals("DELETE /product")){
+                response = cmdDeleteProduct(objRequest);
+            }else if (objRequest.getEndpoint().equals("DELETE /user")){
+
+            }
+            else {
                 response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
             }
         } catch (Throwable throwable) {
@@ -313,8 +328,88 @@ public class Server {
             database.insertPurchase(new Purchase(UUID.randomUUID().toString(), user.getId(), product.getId()));
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
-        } catch (NotEnoughMoneyException exception){
+        } catch (NotEnoughMoneyException exception) {
             return new UnsuccessfulResponse("400 Bad Request", "User don`t have enough money");
+        } catch (Exception e) {
+            database.rollback();
+            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
+        }
+    }
+    private Response cmdPatchProduct(Request objRequest) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            HashMap updateProduct = mapper.readValue(objRequest.getBody(), HashMap.class);
+            if (updateProduct.containsKey("price")) {
+                if ((Double)updateProduct.get("price") <= 0) {
+                    return new UnsuccessfulResponse("400", "Wrong amount value");
+                }
+            }
+            Product product = database.findProductById((String) objRequest.getQueryString().get("id"));
+            if (updateProduct.containsKey("name")){
+                product.setName((String) updateProduct.get("name"));
+            }
+            if (updateProduct.containsKey("price")){
+                product.setPrice((Double) updateProduct.get("price"));
+            }
+            database.updateProduct(product);
+
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        }
+
+        return new SuccessfulResponseMessage("200 OK", "Product update successful");
+    }
+
+    private Response cmdPatchUser (Request objRequest){
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            HashMap updateProduct = mapper.readValue(objRequest.getBody(), HashMap.class);
+            if (updateProduct.containsKey("amount")) {
+                if ((Double)updateProduct.get("amount") <= 0) {
+                    return new UnsuccessfulResponse("400", "Wrong amount value");
+                }
+            }
+            User user = database.findUserById((String) objRequest.getQueryString().get("id"));
+            if (updateProduct.containsKey("firstName")){
+                user.setFirstName((String) updateProduct.get("firstName"));
+            }
+            if (updateProduct.containsKey("lastName")){
+                user.setLastName((String) updateProduct.get("lastName"));
+            }
+            if (updateProduct.containsKey("amount")){
+                user.setAmount((Double) updateProduct.get("amount"));
+            }
+            if (updateProduct.containsKey("login")){
+                user.setLogin((String) updateProduct.get("login"));
+            }
+            if (updateProduct.containsKey("password")){
+                user.setPassword((String) updateProduct.get("password"));
+            }
+
+            database.updateUser(user);
+
+        } catch (JsonProcessingException e) {
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+        }
+
+        return new SuccessfulResponseMessage("200 OK", "User update successful");
+    }
+
+    private Response cmdDeleteProduct(Request objRequest) {
+        Product product = database.findProductById((String) objRequest.getQueryString().get("id"));
+        if (product == null){
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
+        }
+        System.out.println(product.getName());
+        try {
+            ArrayList<Purchase> purchases = database.findPurchasesByProductId((String) objRequest.getQueryString().get("id"));
+            database.startTransaction();
+            database.deleteProduct(product.getId());
+            for (Purchase purchase : purchases) {
+                database.deletePurchases(purchase.getId());
+            }
+            database.closeTransaction();
+            return new SuccessfulResponseMessage("200 OK", "Product successful delete");
         } catch (Exception e) {
             database.rollback();
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");

@@ -1,7 +1,6 @@
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
 
 public class Database {
 
@@ -56,6 +55,28 @@ public class Database {
             stmt.setString(1, product.getId());
             stmt.setString(2, product.getName());
             stmt.setDouble(3, product.getPrice());
+            stmt.execute();
+
+        } catch (SQLException e) {
+            System.err.println("Something wrong with product add");
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    public void updateProduct(Product product) {
+
+        Connection connection = createConnection();
+        try {
+            PreparedStatement stmt = connection.prepareStatement("UPDATE products SET id = ?, name = ?, price = ? WHERE id = ?");
+            stmt.setString(1, product.getId());
+            stmt.setString(2, product.getName());
+            stmt.setDouble(3, product.getPrice());
+            stmt.setString(4, product.getId());
             stmt.execute();
 
         } catch (SQLException e) {
@@ -377,7 +398,7 @@ public class Database {
             }
             if (criteria.containsKey("id")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND products.id = ?" : " id = ?";
-
+                preparedStatementValues.add(criteria.get("id"));
             }
             if (criteria.containsKey("name")) {
                 sqlQuery += sqlQuery.contains("=") ? " AND products.name = ?" : " name = ?";
@@ -415,6 +436,33 @@ public class Database {
         return productsForResponse;
     }
 
+    ArrayList <Purchase> findPurchasesByProductId(String id){
+        ArrayList <Purchase> purchasesForResponse = new ArrayList<>();
+
+        Connection connection = createConnection();
+        try {
+            PreparedStatement statement = connection.prepareStatement("SELECT FROM purchases WHERE productId = ?");
+            statement.setString(1,id);
+            ResultSet resultSet = statement.executeQuery();
+
+            while (resultSet.next()) {
+                Purchase purchase = new Purchase(resultSet.getString("id"), resultSet.getString("userId"),
+                        resultSet.getString("productId"));
+                purchasesForResponse.add(purchase);
+            }
+
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                connection.close();
+            } catch (SQLException ignored) {
+            }
+        }
+
+        return purchasesForResponse;
+    }
+
     public void startTransaction() {
         this.transactionConnection = createConnection();
         try {
@@ -442,6 +490,52 @@ public class Database {
             this.transactionConnection.close();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        }
+    }
+
+    public void deleteProduct(String id) {
+        Connection connection;
+        if (this.transactionConnection == null) {
+            connection = createConnection();
+        } else {
+            connection = transactionConnection;
+        }
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM products WHERE id = ?");
+            statement.setString(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (transactionConnection == null) {
+                    connection.close();
+                }
+            } catch (SQLException ignored) {
+            }
+        }
+    }
+
+    public void deletePurchases(String id) {
+        Connection connection;
+        if (this.transactionConnection == null) {
+            connection = createConnection();
+        } else {
+            connection = transactionConnection;
+        }
+        try {
+            PreparedStatement statement = connection.prepareStatement("DELETE FROM purchases WHERE id = ?");
+            statement.setString(1, id);
+            statement.execute();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        } finally {
+            try {
+                if (transactionConnection == null) {
+                    connection.close();
+                }
+            } catch (SQLException ignored) {
+            }
         }
     }
 }

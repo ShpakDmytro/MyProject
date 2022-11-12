@@ -88,6 +88,25 @@ public class User {
         return status.equals("confirmed");
     }
 
+    public void setFirstName(String firstName){
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+
+    public void setAmount(Double amount){
+        this.amount = amount;
+    }
+
+    public void setLogin(String login){
+        this.login = login;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
