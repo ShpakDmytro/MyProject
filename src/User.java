@@ -84,6 +84,10 @@ public class User {
         return confirmationCode.equals(code);
     }
 
+    public void setConfirmationCode (String confirmationCode){
+        this.confirmationCode = confirmationCode;
+    }
+
     boolean isConfirmed() {
         return status.equals("confirmed");
     }
