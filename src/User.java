@@ -12,6 +12,8 @@ public class User {
     private String status;
     private String confirmationCode;
 
+    private String restoreCode;
+
     //create User
     public User(String id, String firstName, String lastName, double amount,
                 String login, String password) {
@@ -23,12 +25,14 @@ public class User {
         this.password = password;
         this.accessToken = null;
         this.status = "unconfirmed";
-        this.confirmationCode = UUID.randomUUID().toString();
+        this.confirmationCode = UUID.randomUUID().toString().substring(0,5);
+        this.restoreCode = null;
     }
 
     //reconstruction User from bd
     public User(String id, String firstName, String lastName, double amount,
-                String login, String password, String accessToken, String status, String confirmationCode) {
+                String login, String password, String accessToken, String status, String confirmationCode,
+                String restoreCode) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -38,6 +42,7 @@ public class User {
         this.accessToken = accessToken;
         this.status = status;
         this.confirmationCode = confirmationCode;
+        this.restoreCode = restoreCode;
     }
 
     public String getId() {
@@ -71,6 +76,10 @@ public class User {
         return confirmationCode;
     }
 
+    public String getRestoreCode(){
+        return restoreCode;
+    }
+
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
@@ -86,6 +95,10 @@ public class User {
 
     public void setConfirmationCode (String confirmationCode){
         this.confirmationCode = confirmationCode;
+    }
+
+    public void setRestoreCode(String restoreCode){
+        this.restoreCode = restoreCode;
     }
 
     boolean isConfirmed() {
@@ -132,6 +145,7 @@ public class User {
         user.put("accessToken", this.accessToken);
         user.put("status", this.status);
         user.put("confirmationCode", this.confirmationCode);
+        user.put("restoreCode", this.restoreCode);
 
         return user;
     }

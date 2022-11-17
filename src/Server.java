@@ -134,16 +134,22 @@ public class Server {
 
             } else if (objRequest.getEndpoint().equals("PATCH /product")) {
                 response = cmdPatchProduct(objRequest);
+
             } else if (objRequest.getEndpoint().equals("PATCH /user")) {
                 response = cmdPatchUser(objRequest);
+
             } else if (objRequest.getEndpoint().equals("POST /forgot-password")) {
                 response = cmdForgotPassword(objRequest);
+
             } else if (objRequest.getEndpoint().equals("POST /forgot-password-finish")) {
                 response = cmdForgotPasswordFinish(objRequest);
+
             } else if (objRequest.getEndpoint().equals("DELETE /product")) {
                 response = cmdDeleteProduct(objRequest);
+
             } else if (objRequest.getEndpoint().equals("DELETE /user")) {
                 response = cmdDeleteUser(objRequest);
+
             } else {
                 response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
             }
@@ -445,9 +451,9 @@ public class Server {
 
                 User user = database.findUserByLogin((String) request.get("login"));
                 SMSSender smSsender = new SMSSender();
-                user.setConfirmationCode(UUID.randomUUID().toString());
+                user.setRestoreCode(UUID.randomUUID().toString().substring(0,5));
                 database.updateUser(user);
-                smSsender.sendSms(user.getLogin(), user.getConfirmationCode());
+                smSsender.sendSms(user.getLogin(), user.getRestoreCode());
 
                 return new SuccessfulResponseMessage("200 OK", "Send confirmation code");
             }
@@ -464,8 +470,9 @@ public class Server {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
             if (request.containsKey("login")) {
                 User user = database.findUserByLogin((String) request.get("login"));
-                if (user.getConfirmationCode().equals(request.get("confirmationCode"))){
+                if (user.getRestoreCode().equals(request.get("restoreCode"))){
                     user.setPassword((String) request.get("password"));
+                    user.setRestoreCode("null");
                     database.updateUser(user);
                 }
                 return new SuccessfulResponseMessage("200 OK", "Password successful changed");

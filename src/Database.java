@@ -192,7 +192,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
             }
             return user;
         } catch (SQLException e) {
@@ -219,7 +219,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -245,7 +245,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -271,7 +271,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"), resultSet.getString("confirmationCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -390,7 +390,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
                 usersForResponse.add(user);
             }
 
