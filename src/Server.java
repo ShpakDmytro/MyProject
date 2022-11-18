@@ -468,7 +468,7 @@ public class Server {
             return new SuccessfulResponseMessage("200 OK", "Send password reset code");
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
 
@@ -487,15 +487,15 @@ public class Server {
             try {
                 user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
             } catch (BadPasswordResetCodeException e) {
-                new UnsuccessfulResponse("400 Bad Request", "Wrong reset code");
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong reset code");
             } catch (PasswordResetNotRequestedCodeException e) {
-                new UnsuccessfulResponse("400 Bad Request", "Reset code not requested");
+                return new UnsuccessfulResponse("400 Bad Request", "Reset code not requested");
             }
             database.updateUser(user);
             return new SuccessfulResponseMessage("200 OK", "Password successful changed");
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
 }
