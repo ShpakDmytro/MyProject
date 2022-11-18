@@ -12,6 +12,8 @@ public class User {
     private String status;
     private String confirmationCode;
 
+    private String passwordResetCode;
+
     //create User
     public User(String id, String firstName, String lastName, double amount,
                 String login, String password) {
@@ -23,12 +25,14 @@ public class User {
         this.password = password;
         this.accessToken = null;
         this.status = "unconfirmed";
-        this.confirmationCode = UUID.randomUUID().toString();
+        this.confirmationCode = UUID.randomUUID().toString().substring(0,5);
+        this.passwordResetCode = null;
     }
 
     //reconstruction User from bd
     public User(String id, String firstName, String lastName, double amount,
-                String login, String password, String accessToken, String status, String confirmationCode) {
+                String login, String password, String accessToken, String status, String confirmationCode,
+                String passwordResetCode) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -38,6 +42,7 @@ public class User {
         this.accessToken = accessToken;
         this.status = status;
         this.confirmationCode = confirmationCode;
+        this.passwordResetCode = passwordResetCode;
     }
 
     public String getId() {
@@ -71,6 +76,10 @@ public class User {
         return confirmationCode;
     }
 
+    public String getPasswordResetCode(){
+        return passwordResetCode;
+    }
+
     public void buyProduct(Product product) throws Exception {
         if (amount - product.getPrice() > 0) {
             this.amount = amount - product.getPrice();
@@ -84,10 +93,37 @@ public class User {
         return confirmationCode.equals(code);
     }
 
+    public void setConfirmationCode (String confirmationCode){
+        this.confirmationCode = confirmationCode;
+    }
+
+    public void setPasswordResetCode(String passwordResetCode){
+        this.passwordResetCode = passwordResetCode;
+    }
+
     boolean isConfirmed() {
         return status.equals("confirmed");
     }
 
+    public void setFirstName(String firstName){
+        this.firstName = firstName;
+    }
+
+    public void setLastName(String lastName){
+        this.lastName = lastName;
+    }
+
+    public void setAmount(Double amount){
+        this.amount = amount;
+    }
+
+    public void setLogin(String login){
+        this.login = login;
+    }
+
+    public void setPassword(String password){
+        this.password = password;
+    }
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
     }
@@ -97,6 +133,15 @@ public class User {
         status = "confirmed";
     }
 
+   public void changePasswordFromResetCode(String code, String newPassword) throws BadPasswordResetCodeException, PasswordResetNotRequestedCodeException {
+        if (this.passwordResetCode == null){
+         throw new PasswordResetNotRequestedCodeException("Reset code not requested");
+        }
+        if (this.passwordResetCode.equals(code)){
+            this.password = newPassword;
+            this.passwordResetCode = null;
+        } else throw new BadPasswordResetCodeException("Wrong reset code");
+   }
     public HashMap toHashMapUser() {
 
         HashMap<String, Object> user = new HashMap<>();
@@ -109,6 +154,7 @@ public class User {
         user.put("accessToken", this.accessToken);
         user.put("status", this.status);
         user.put("confirmationCode", this.confirmationCode);
+        user.put("passwordResetCode", this.passwordResetCode);
 
         return user;
     }

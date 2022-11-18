@@ -11,10 +11,6 @@ public class Product {
         this.price = price;
     }
 
-    public Product(String name, double price) {
-        this.name = name;
-        this.price = price;
-    }
     public String getId() {
         return id;
     }
@@ -25,6 +21,14 @@ public class Product {
 
     public Double getPrice() {
         return price;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public void setPrice (Double price){
+        this.price = price;
     }
 
     public HashMap toHashMapProduct() {

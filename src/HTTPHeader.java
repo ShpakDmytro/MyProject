@@ -6,4 +6,9 @@ public class HTTPHeader {
         this.name = name;
         this.value = value;
     }
+
+    public String getValue() {
+        return value;
+    }
+
 }
