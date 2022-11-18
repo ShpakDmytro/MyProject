@@ -133,11 +133,14 @@ public class User {
         status = "confirmed";
     }
 
-   public void changePasswordFromResetCode(String code, String newPassword){
+   public void changePasswordFromResetCode(String code, String newPassword) throws BadPasswordResetCodeException, PasswordResetNotRequestedCodeException {
+        if (this.passwordResetCode == null){
+         throw new PasswordResetNotRequestedCodeException("Reset code not requested");
+        }
         if (this.passwordResetCode.equals(code)){
             this.password = newPassword;
             this.passwordResetCode = null;
-        }
+        } else throw new BadPasswordResetCodeException("Wrong reset code");
    }
     public HashMap toHashMapUser() {
 
