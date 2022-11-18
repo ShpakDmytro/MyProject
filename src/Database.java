@@ -25,7 +25,7 @@ public class Database {
         Connection connection = createConnection();
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (id, firstName, lastName, amount, login, password, accessToken, status, confirmationCode,restoreCode) VALUES (?,?,?,?,?,?,?,?,?,?)");
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (id, firstName, lastName, amount, login, password, accessToken, status, confirmationCode,passwordResetCode) VALUES (?,?,?,?,?,?,?,?,?,?)");
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getFirstName());
             stmt.setString(3, user.getLastName());
@@ -35,7 +35,7 @@ public class Database {
             stmt.setString(7, user.getAccessToken());
             stmt.setString(8, user.getStatus());
             stmt.setString(9, user.getConfirmationCode());
-            stmt.setString(10,user.getRestoreCode());
+            stmt.setString(10,user.getPasswordResetCode());
             stmt.execute();
         } catch (SQLException e) {
             System.err.println("Something wrong with user add");
@@ -131,7 +131,7 @@ public class Database {
         try {
             PreparedStatement stmt = connection.prepareStatement("UPDATE users SET id = ?, firstName = ?, lastName = ?, " +
                     "amount = ?, login = ?, password = ?, accessToken = ?,  status = ?, confirmationCode = ?," +
-                    "restoreCode = ? WHERE id = ?");
+                    "passwordResetCode = ? WHERE id = ?");
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getFirstName());
             stmt.setString(3, user.getLastName());
@@ -141,7 +141,7 @@ public class Database {
             stmt.setString(7, user.getAccessToken());
             stmt.setString(8, user.getStatus());
             stmt.setString(9, user.getConfirmationCode());
-            stmt.setString(10,user.getRestoreCode());
+            stmt.setString(10,user.getPasswordResetCode());
             stmt.setString(11, user.getId());
             stmt.execute();
 
@@ -195,7 +195,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("passwordResetCode"));
             }
             return user;
         } catch (SQLException e) {
@@ -222,7 +222,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -248,7 +248,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -274,7 +274,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"), resultSet.getString("restoreCode"));
+                        resultSet.getString("confirmationCode"), resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -324,7 +324,7 @@ public class Database {
             }
             if (criteria.containsKey("productId")) {
                 sqlQuery = "SELECT users.id, users.firstName, users.lastName, users.amount, users.login, users.password, " +
-                        "users.accessToken, users.status, users.confirmationCode FROM users " +
+                        "users.accessToken, users.status, users.confirmationCode, users.passwordResetCode FROM users " +
                         "JOIN purchases ON users.id = purchases.userId WHERE purchases.productId = ?";
                 preparedStatementValues.add(criteria.get("productId"));
             }
@@ -380,9 +380,9 @@ public class Database {
 
             }
 
-            if (criteria.containsKey("restoreCode")) {
-                sqlQuery += sqlQuery.contains("=") ? " AND users.restoreCode = ?" : " restoreCode = ?";
-                preparedStatementValues.add(criteria.get("restoreCode"));
+            if (criteria.containsKey("passwordResetCode")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND users.passwordResetCode = ?" : " passwordResetCode = ?";
+                preparedStatementValues.add(criteria.get("passwordResetCode"));
 
             }
 
@@ -399,7 +399,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"),resultSet.getString("restoreCode"));
+                        resultSet.getString("confirmationCode"),resultSet.getString("passwordResetCode"));
                 usersForResponse.add(user);
             }
 

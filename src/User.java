@@ -12,7 +12,7 @@ public class User {
     private String status;
     private String confirmationCode;
 
-    private String restoreCode;
+    private String passwordResetCode;
 
     //create User
     public User(String id, String firstName, String lastName, double amount,
@@ -26,13 +26,13 @@ public class User {
         this.accessToken = null;
         this.status = "unconfirmed";
         this.confirmationCode = UUID.randomUUID().toString().substring(0,5);
-        this.restoreCode = null;
+        this.passwordResetCode = null;
     }
 
     //reconstruction User from bd
     public User(String id, String firstName, String lastName, double amount,
                 String login, String password, String accessToken, String status, String confirmationCode,
-                String restoreCode) {
+                String passwordResetCode) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -42,7 +42,7 @@ public class User {
         this.accessToken = accessToken;
         this.status = status;
         this.confirmationCode = confirmationCode;
-        this.restoreCode = restoreCode;
+        this.passwordResetCode = passwordResetCode;
     }
 
     public String getId() {
@@ -76,8 +76,8 @@ public class User {
         return confirmationCode;
     }
 
-    public String getRestoreCode(){
-        return restoreCode;
+    public String getPasswordResetCode(){
+        return passwordResetCode;
     }
 
     public void buyProduct(Product product) throws Exception {
@@ -97,8 +97,8 @@ public class User {
         this.confirmationCode = confirmationCode;
     }
 
-    public void setRestoreCode(String restoreCode){
-        this.restoreCode = restoreCode;
+    public void setPasswordResetCode(String passwordResetCode){
+        this.passwordResetCode = passwordResetCode;
     }
 
     boolean isConfirmed() {
@@ -133,6 +133,12 @@ public class User {
         status = "confirmed";
     }
 
+   public void changePasswordFromResetCode(String code, String newPassword){
+        if (this.passwordResetCode.equals(code)){
+            this.password = newPassword;
+            this.passwordResetCode = null;
+        }
+   }
     public HashMap toHashMapUser() {
 
         HashMap<String, Object> user = new HashMap<>();
@@ -145,7 +151,7 @@ public class User {
         user.put("accessToken", this.accessToken);
         user.put("status", this.status);
         user.put("confirmationCode", this.confirmationCode);
-        user.put("restoreCode", this.restoreCode);
+        user.put("passwordResetCode", this.passwordResetCode);
 
         return user;
     }

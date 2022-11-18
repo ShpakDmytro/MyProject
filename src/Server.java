@@ -141,8 +141,8 @@ public class Server {
             } else if (objRequest.getEndpoint().equals("POST /forgot-password")) {
                 response = cmdForgotPassword(objRequest);
 
-            } else if (objRequest.getEndpoint().equals("POST /forgot-password-finish")) {
-                response = cmdForgotPasswordFinish(objRequest);
+            } else if (objRequest.getEndpoint().equals("POST /reset-password/finish")) {
+                response = cmdResetPasswordFinish(objRequest);
 
             } else if (objRequest.getEndpoint().equals("DELETE /product")) {
                 response = cmdDeleteProduct(objRequest);
@@ -452,39 +452,42 @@ public class Server {
 
         try {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
-            if (request.containsKey("login")) {
 
-                User user = database.findUserByLogin((String) request.get("login"));
-                SMSSender smSsender = new SMSSender();
-                user.setRestoreCode(UUID.randomUUID().toString().substring(0, 5));
-                database.updateUser(user);
-                smSsender.sendSms(user.getLogin(), user.getRestoreCode());
-
-                return new SuccessfulResponseMessage("200 OK", "Send restore code");
+            if (!request.containsKey("login")) {
+                return new UnsuccessfulResponse("400 Bad Request", "Login required");
             }
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
+            User user = database.findUserByLogin((String) request.get("login"));
+            if (user == null) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
+            }
+            SMSSender smSsender = new SMSSender();
+            user.setPasswordResetCode(UUID.randomUUID().toString().substring(0, 5));
+            database.updateUser(user);
+            smSsender.sendSms(user.getLogin(), user.getPasswordResetCode());
+
+            return new SuccessfulResponseMessage("200 OK", "Send password reset code");
+
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
     }
 
-    private Response cmdForgotPasswordFinish(Request objRequest) {
+    private Response cmdResetPasswordFinish(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
-            if (request.containsKey("login")) {
-                User user = database.findUserByLogin((String) request.get("login"));
-                System.out.println(user.getRestoreCode());
-                if (user.getRestoreCode().equals(request.get("restoreCode"))) {
-                    user.setPassword((String) request.get("password"));
-                    user.setRestoreCode(null);
-                    database.updateUser(user);
-                    return new SuccessfulResponseMessage("200 OK", "Password successful changed");
-                }
+            if (!request.containsKey("login") || !request.containsKey("password")) {
+                return new UnsuccessfulResponse("400 Bad Request", "There are no mandatory parameters");
             }
+            User user = database.findUserByLogin((String) request.get("login"));
+            if (user == null){
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
+            }
+            user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
+            database.updateUser(user);
+            return new SuccessfulResponseMessage("200 OK", "Password successful changed");
 
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong restore code");
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
