@@ -25,7 +25,7 @@ public class Database {
         Connection connection = createConnection();
 
         try {
-            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (id, firstName, lastName, amount, login, password, accessToken, status, confirmationCode) VALUES (?,?,?,?,?,?,?,?,?)");
+            PreparedStatement stmt = connection.prepareStatement("INSERT INTO users (id, firstName, lastName, amount, login, password, accessToken, status, confirmationCode,restoreCode) VALUES (?,?,?,?,?,?,?,?,?,?)");
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getFirstName());
             stmt.setString(3, user.getLastName());
@@ -35,6 +35,7 @@ public class Database {
             stmt.setString(7, user.getAccessToken());
             stmt.setString(8, user.getStatus());
             stmt.setString(9, user.getConfirmationCode());
+            stmt.setString(10,user.getRestoreCode());
             stmt.execute();
         } catch (SQLException e) {
             System.err.println("Something wrong with user add");
@@ -129,7 +130,8 @@ public class Database {
 
         try {
             PreparedStatement stmt = connection.prepareStatement("UPDATE users SET id = ?, firstName = ?, lastName = ?, " +
-                    "amount = ?, login = ?, password = ?, accessToken = ?,  status = ?, confirmationCode = ? WHERE id = ?");
+                    "amount = ?, login = ?, password = ?, accessToken = ?,  status = ?, confirmationCode = ?," +
+                    "restoreCode = ? WHERE id = ?");
             stmt.setString(1, user.getId());
             stmt.setString(2, user.getFirstName());
             stmt.setString(3, user.getLastName());
@@ -139,7 +141,8 @@ public class Database {
             stmt.setString(7, user.getAccessToken());
             stmt.setString(8, user.getStatus());
             stmt.setString(9, user.getConfirmationCode());
-            stmt.setString(10, user.getId());
+            stmt.setString(10,user.getRestoreCode());
+            stmt.setString(11, user.getId());
             stmt.execute();
 
         } catch (SQLException e) {
@@ -271,7 +274,7 @@ public class Database {
                         resultSet.getString("lastName"), resultSet.getDouble("amount"),
                         resultSet.getString("login"), resultSet.getString("password"),
                         resultSet.getString("accessToken"), resultSet.getString("status"),
-                        resultSet.getString("confirmationCode"), resultSet.getString("confirmationCode"));
+                        resultSet.getString("confirmationCode"), resultSet.getString("restoreCode"));
             }
         } catch (SQLException e) {
             throw new RuntimeException(e);
@@ -377,6 +380,12 @@ public class Database {
 
             }
 
+            if (criteria.containsKey("restoreCode")) {
+                sqlQuery += sqlQuery.contains("=") ? " AND users.restoreCode = ?" : " restoreCode = ?";
+                preparedStatementValues.add(criteria.get("restoreCode"));
+
+            }
+
             PreparedStatement statement = connection.prepareStatement(sqlQuery);
 
             for (int i = 0; i < preparedStatementValues.size(); i++) {
@@ -467,7 +476,7 @@ public class Database {
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT FROM purchases WHERE productId = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE productId = ?");
             statement.setString(1,id);
             ResultSet resultSet = statement.executeQuery();
 
@@ -494,7 +503,7 @@ public class Database {
 
         Connection connection = createConnection();
         try {
-            PreparedStatement statement = connection.prepareStatement("SELECT FROM purchases WHERE userId = ?");
+            PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE userId = ?");
             statement.setString(1,id);
             ResultSet resultSet = statement.executeQuery();
 

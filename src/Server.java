@@ -410,9 +410,11 @@ public class Server {
             ArrayList<Purchase> purchases = database.findPurchasesByProductId((String) objRequest.getQueryString().get("id"));
             database.startTransaction();
             database.deleteProduct(product);
+
             for (Purchase purchase : purchases) {
                 database.deletePurchases(purchase);
             }
+
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "Product successful delete");
         } catch (Exception e) {
@@ -429,11 +431,14 @@ public class Server {
 
         try {
             ArrayList<Purchase> purchases = database.findPurchasesByUserId((String) objRequest.getQueryString().get("id"));
+
             database.startTransaction();
             database.deleteUser(user);
+
             for (Purchase purchase : purchases) {
                 database.deletePurchases(purchase);
             }
+
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "User successful delete");
         } catch (Exception e) {
@@ -451,11 +456,11 @@ public class Server {
 
                 User user = database.findUserByLogin((String) request.get("login"));
                 SMSSender smSsender = new SMSSender();
-                user.setRestoreCode(UUID.randomUUID().toString().substring(0,5));
+                user.setRestoreCode(UUID.randomUUID().toString().substring(0, 5));
                 database.updateUser(user);
                 smSsender.sendSms(user.getLogin(), user.getRestoreCode());
 
-                return new SuccessfulResponseMessage("200 OK", "Send confirmation code");
+                return new SuccessfulResponseMessage("200 OK", "Send restore code");
             }
             return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
         } catch (JsonProcessingException e) {
@@ -470,14 +475,16 @@ public class Server {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
             if (request.containsKey("login")) {
                 User user = database.findUserByLogin((String) request.get("login"));
-                if (user.getRestoreCode().equals(request.get("restoreCode"))){
+                System.out.println(user.getRestoreCode());
+                if (user.getRestoreCode().equals(request.get("restoreCode"))) {
                     user.setPassword((String) request.get("password"));
-                    user.setRestoreCode("null");
+                    user.setRestoreCode(null);
                     database.updateUser(user);
+                    return new SuccessfulResponseMessage("200 OK", "Password successful changed");
                 }
-                return new SuccessfulResponseMessage("200 OK", "Password successful changed");
             }
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong confirmation code");
+
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong restore code");
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
