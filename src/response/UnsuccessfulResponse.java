@@ -1,3 +1,4 @@
+package response;
 public class UnsuccessfulResponse implements Response {
     private String status;
     private String bodyResponse;

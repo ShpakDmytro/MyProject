@@ -1,6 +1,11 @@
+package controllers;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import models.*;
+import exception.*;
+
 
 public class Database {
 

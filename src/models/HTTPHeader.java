@@ -1,3 +1,4 @@
+package models;
 public class HTTPHeader {
     private String name;
     private String value;
