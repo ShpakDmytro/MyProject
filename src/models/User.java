@@ -1,5 +1,8 @@
+package models;
+
 import java.util.HashMap;
 import java.util.UUID;
+import exception.*;
 
 public class User {
     private String id;
@@ -86,7 +89,7 @@ public class User {
         } else throw new NotEnoughMoneyException("You haven`t enough money");
     }
 
-    boolean compareConfirmationCode(String code) {
+    public boolean compareConfirmationCode(String code) {
         if (confirmationCode == null) {
             return false;
         }
@@ -101,7 +104,7 @@ public class User {
         this.passwordResetCode = passwordResetCode;
     }
 
-    boolean isConfirmed() {
+    public boolean isConfirmed() {
         return status.equals("confirmed");
     }
 

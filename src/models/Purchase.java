@@ -1,3 +1,5 @@
+package models;
+
 public class Purchase {
     private String id;
     private String userId;

@@ -1,5 +1,4 @@
-
-
+package response;
 public class SuccessfulResponseSignIn implements Response {
 
     private String status;

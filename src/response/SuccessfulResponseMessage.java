@@ -1,3 +1,4 @@
+package response;
 public class SuccessfulResponseMessage implements Response {
     private String status;
     private String bodyResponse;
