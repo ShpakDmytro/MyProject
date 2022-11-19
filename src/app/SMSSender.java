@@ -1,4 +1,4 @@
-package controllers;
+package app;
 
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
@@ -25,7 +25,7 @@ public class SMSSender {
 
     }
 
-    private CloseableHttpResponse sendPOST(String url, String bodyRequest) throws IOException {
+    public CloseableHttpResponse sendPOST(String url, String bodyRequest) throws IOException {
 
         HttpPost post = new HttpPost(url);
         post.addHeader("Host", "rest.nexmo.com");

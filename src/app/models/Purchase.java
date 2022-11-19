@@ -1,4 +1,4 @@
-package models;
+package app.models;
 
 public class Purchase {
     private String id;

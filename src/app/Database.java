@@ -1,11 +1,9 @@
-package controllers;
+package app;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import models.*;
-import exception.*;
-
+import app.models.*;
 
 public class Database {
 
@@ -14,7 +12,7 @@ public class Database {
     public Database() {
     }
 
-    private Connection createConnection() {
+    public Connection createConnection() {
 
         try {
             return DriverManager.getConnection(
@@ -25,7 +23,7 @@ public class Database {
         }
     }
 
-    void insertUser(User user) {
+    public void insertUser(User user) {
 
         Connection connection = createConnection();
 
@@ -53,7 +51,7 @@ public class Database {
         }
     }
 
-    void insertProduct(Product product) {
+    public void insertProduct(Product product) {
 
         Connection connection = createConnection();
         try {
@@ -125,7 +123,7 @@ public class Database {
         }
     }
 
-    void updateUser(User user) {
+    public void updateUser(User user) {
         Connection connection;
         if (this.transactionConnection == null) {
             connection = createConnection();
@@ -163,7 +161,7 @@ public class Database {
         }
     }
 
-    boolean existsUserByLogin(String loginFromUser) {
+    public boolean existsUserByLogin(String loginFromUser) {
 
         Connection connection = createConnection();
         try {

@@ -1,4 +1,4 @@
-package response;
+package app;
 public interface Response {
     String serialize();
 }

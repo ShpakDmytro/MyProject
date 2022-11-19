@@ -1,4 +1,5 @@
-package models;
+package app;
+
 public class HTTPHeader {
     private String name;
     private String value;

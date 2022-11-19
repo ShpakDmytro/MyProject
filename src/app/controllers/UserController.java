@@ -1,4 +1,4 @@
-package controllers;
+package app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-import models.*;
-import exception.*;
-import response.*;
+import app.models.*;
+import app.exception.*;
+import app.response.*;
+import app.*;
 
 public class UserController {
 
@@ -24,11 +25,11 @@ public class UserController {
         try {
             HashMap requestBody = mapper.readValue(objRequest.getBody(), HashMap.class);
             if ((Double) requestBody.get("amount") <= 0) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong amount value");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Wrong amount value");
             }
 
             if (database.existsUserByLogin((String) requestBody.get("login"))) {
-                return new UnsuccessfulResponse("400 Bad Request", "This login already exists");
+                return new UnsuccessfulResponse("400 Bad app.Request", "This login already exists");
             }
 
             User user = new User(UUID.randomUUID().toString(), (String) requestBody.get("firstName"),
@@ -41,7 +42,7 @@ public class UserController {
             smSsender.sendSms(user.getLogin(), user.getConfirmationCode());
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Successful add new user");
@@ -56,19 +57,19 @@ public class UserController {
 
             if (user != null) {
                 if (user.isConfirmed()) {
-                    return new UnsuccessfulResponse("400 Bad Request", "User already confirmed");
+                    return new UnsuccessfulResponse("400 Bad app.Request", "User already confirmed");
                 }
                 if (user.compareConfirmationCode((String) requestBody.get("confirmationCode"))) {
                     user.setStatusConfirmed();
                     database.updateUser(user);
                     return new SuccessfulResponseMessage("200 OK", "Successful confirmed user");
                 } else {
-                    return new UnsuccessfulResponse("400 Bad Request", "Wrong confirmed code");
+                    return new UnsuccessfulResponse("400 Bad app.Request", "Wrong confirmed code");
                 }
             }
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
         return new UnsuccessfulResponse("404 Not Found", "User not found");
     }
@@ -89,10 +90,10 @@ public class UserController {
             }
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
-        return new UnsuccessfulResponse("400 Bad Request", "No user found");
+        return new UnsuccessfulResponse("400 Bad app.Request", "No user found");
     }
 
     public Response cmdSignOut(Request objRequest) {
@@ -110,10 +111,10 @@ public class UserController {
             }
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
-        return new UnsuccessfulResponse("400 Bad Request", "No user found");
+        return new UnsuccessfulResponse("400 Bad app.Request", "No user found");
     }
 
     public Response cmdFindUsers(Request objRequest) {
@@ -156,7 +157,7 @@ public class UserController {
             database.updateUser(user);
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "User update successful");
@@ -169,11 +170,11 @@ public class UserController {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
 
             if (!request.containsKey("login")) {
-                return new UnsuccessfulResponse("400 Bad Request", "Login required");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Login required");
             }
             User user = database.findUserByLogin((String) request.get("login"));
             if (user == null) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Wrong login");
             }
             SMSSender smSsender = new SMSSender();
             user.setPasswordResetCode(UUID.randomUUID().toString().substring(0, 5));
@@ -183,7 +184,7 @@ public class UserController {
             return new SuccessfulResponseMessage("200 OK", "Send password reset code");
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Invalid JSON format");
         }
     }
 
@@ -193,31 +194,31 @@ public class UserController {
         try {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
             if (!request.containsKey("login") || !request.containsKey("password") || !request.containsKey("passwordResetCode")){
-                return new UnsuccessfulResponse("400 Bad Request", "There are no mandatory parameters");
+                return new UnsuccessfulResponse("400 Bad app.Request", "There are no mandatory parameters");
             }
             User user = database.findUserByLogin((String) request.get("login"));
             if (user == null){
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Wrong login");
             }
             try {
                 user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
             } catch (BadPasswordResetCodeException e) {
-                return new UnsuccessfulResponse("400 Bad Request", "Wrong reset code");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Wrong reset code");
             } catch (PasswordResetNotRequestedCodeException e) {
-                return new UnsuccessfulResponse("400 Bad Request", "Reset code not requested");
+                return new UnsuccessfulResponse("400 Bad app.Request", "Reset code not requested");
             }
             database.updateUser(user);
             return new SuccessfulResponseMessage("200 OK", "Password successful changed");
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Invalid JSON format");
         }
     }
 
     public Response cmdDeleteUser(Request objRequest) {
         User user = database.findUserById((String) objRequest.getQueryString().get("id"));
         if (user == null) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong user id");
         }
 
         try {
@@ -234,7 +235,7 @@ public class UserController {
             return new SuccessfulResponseMessage("200 OK", "User successful delete");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
+            return new UnsuccessfulResponse("500 Internal app.Server Error", "Something wrong");
         }
     }
 
