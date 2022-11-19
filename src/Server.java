@@ -1,3 +1,4 @@
+
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
@@ -7,8 +8,8 @@ import java.util.HashMap;
 public class Server {
     static final int port = 8080;
 
-
     public Server() {
+
     }
 
     public static void main(String[] args) {

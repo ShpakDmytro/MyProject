@@ -178,7 +178,7 @@ public class UserController {
             return new SuccessfulResponseMessage("200 OK", "Send password reset code");
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
 
@@ -187,19 +187,25 @@ public class UserController {
 
         try {
             HashMap request = mapper.readValue(objRequest.getBody(), HashMap.class);
-            if (!request.containsKey("login") || !request.containsKey("password")) {
+            if (!request.containsKey("login") || !request.containsKey("password") || !request.containsKey("passwordResetCode")){
                 return new UnsuccessfulResponse("400 Bad Request", "There are no mandatory parameters");
             }
             User user = database.findUserByLogin((String) request.get("login"));
             if (user == null){
                 return new UnsuccessfulResponse("400 Bad Request", "Wrong login");
             }
-            user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
+            try {
+                user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
+            } catch (BadPasswordResetCodeException e) {
+                return new UnsuccessfulResponse("400 Bad Request", "Wrong reset code");
+            } catch (PasswordResetNotRequestedCodeException e) {
+                return new UnsuccessfulResponse("400 Bad Request", "Reset code not requested");
+            }
             database.updateUser(user);
             return new SuccessfulResponseMessage("200 OK", "Password successful changed");
 
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
 
