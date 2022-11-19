@@ -1,8 +1,10 @@
-package models;
+package app.models;
 
 import java.util.HashMap;
 import java.util.UUID;
-import exception.*;
+import app.exception.*;
+
+
 
 public class User {
     private String id;

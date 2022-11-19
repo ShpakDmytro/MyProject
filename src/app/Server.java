@@ -1,11 +1,11 @@
+package app;
 
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-import controllers.*;
-import models.*;
-import response.*;
+import app.controllers.*;
+import app.response.*;
 
 
 public class Server {
@@ -153,7 +153,7 @@ public class Server {
                 response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
             }
         } catch (Throwable throwable) {
-            response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
+            response = new UnsuccessfulResponse("500 Internal app.Server Error", "app.Server mistake");
         }
         pout.print(response.serialize());
         pout.close();

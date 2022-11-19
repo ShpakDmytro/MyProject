@@ -1,5 +1,6 @@
-package response;
+package app.response;
 
+import app.Response;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 

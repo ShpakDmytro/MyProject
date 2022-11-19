@@ -1,4 +1,4 @@
-package controllers;
+package app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -6,9 +6,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
-import models.*;
-import exception.*;
-import response.*;
+import app.models.*;
+import app.exception.*;
+import app.response.*;
+import app.*;
 
 public class ProductController {
 
@@ -33,7 +34,7 @@ public class ProductController {
             database.insertProduct(product);
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
@@ -61,17 +62,17 @@ public class ProductController {
             productIdForBuying = (String) buyingRequest.get("productId");
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
         User user = database.findUserById(userIdForBuying);
         if (user == null) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong user id");
         }
 
         Product product = database.findProductById(productIdForBuying);
         if (product == null) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong product id");
         }
 
         try {
@@ -82,10 +83,10 @@ public class ProductController {
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (NotEnoughMoneyException exception) {
-            return new UnsuccessfulResponse("400 Bad Request", "User don`t have enough money");
+            return new UnsuccessfulResponse("400 Bad app.Request", "User don`t have enough money");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
+            return new UnsuccessfulResponse("500 Internal app.Server Error", "Something wrong");
         }
     }
 
@@ -108,7 +109,7 @@ public class ProductController {
             database.updateProduct(product);
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Product update successful");
@@ -117,7 +118,7 @@ public class ProductController {
     public Response cmdDeleteProduct(Request objRequest) {
         Product product = database.findProductById((String) objRequest.getQueryString().get("id"));
         if (product == null) {
-            return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
+            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong product id");
         }
         try {
             ArrayList<Purchase> purchases = database.findPurchasesByProductId((String) objRequest.getQueryString().get("id"));
@@ -132,7 +133,7 @@ public class ProductController {
             return new SuccessfulResponseMessage("200 OK", "Product successful delete");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
+            return new UnsuccessfulResponse("500 Internal app.Server Error", "Something wrong");
         }
     }
 

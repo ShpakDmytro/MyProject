@@ -1,4 +1,4 @@
-package exception;
+package app.exception;
 
 public class BadPasswordResetCodeException extends Exception {
 

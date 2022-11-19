@@ -1,4 +1,7 @@
-package response;
+package app.response;
+
+import app.Response;
+
 public class SuccessfulResponseSignIn implements Response {
 
     private String status;

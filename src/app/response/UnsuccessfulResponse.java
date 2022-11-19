@@ -1,4 +1,7 @@
-package response;
+package app.response;
+
+import app.Response;
+
 public class UnsuccessfulResponse implements Response {
     private String status;
     private String bodyResponse;

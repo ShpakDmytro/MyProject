@@ -1,4 +1,4 @@
-package exception;
+package app.exception;
 public class NotEnoughMoneyException extends Exception{
 
     public NotEnoughMoneyException(String message){
