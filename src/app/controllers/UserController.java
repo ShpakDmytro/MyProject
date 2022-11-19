@@ -19,7 +19,7 @@ public class UserController {
         this.database = new Database();
     }
 
-    @EndpointHandler(method = "POST", endpoint = " /sign-up")
+    @EndpointHandler(endpoint = "POST /sign-up")
     public Response cmdSignUp(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -48,7 +48,7 @@ public class UserController {
 
         return new SuccessfulResponseMessage("200 OK", "Successful add new user");
     }
-    @EndpointHandler(method = "POST",endpoint = " /finish-sign-up")
+    @EndpointHandler(endpoint = "POST /finish-sign-up")
     public Response cmdFinishSignUp(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -74,7 +74,7 @@ public class UserController {
         }
         return new UnsuccessfulResponse("404 Not Found", "User not found");
     }
-    @EndpointHandler(method = "POST", endpoint = " /sign-in")
+    @EndpointHandler(endpoint = "POST /sign-in")
     public Response cmdSignIn(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -96,7 +96,7 @@ public class UserController {
 
         return new UnsuccessfulResponse("400 Bad app.Request", "No user found");
     }
-    @EndpointHandler(method = "POST", endpoint = " /sign-out")
+    @EndpointHandler(endpoint = "POST /sign-out")
     public Response cmdSignOut(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -117,7 +117,7 @@ public class UserController {
 
         return new UnsuccessfulResponse("400 Bad app.Request", "No user found");
     }
-    @EndpointHandler(method = "GET",endpoint = " /users")
+    @EndpointHandler(endpoint = "GET /users")
     public Response cmdFindUsers(Request objRequest) {
 
         ArrayList<User> allUsers = database.findUsers(objRequest.getQueryString());
@@ -128,7 +128,7 @@ public class UserController {
         return new SuccessfulResponseArray("200 OK", allUsersForResponse);
 
     }
-    @EndpointHandler(method = "PATCH",endpoint = " /user")
+    @EndpointHandler(endpoint = "PATCH /user")
     public Response cmdPatchUser(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
         try {
@@ -163,7 +163,7 @@ public class UserController {
 
         return new SuccessfulResponseMessage("200 OK", "User update successful");
     }
-    @EndpointHandler(method = "POST", endpoint = " /forgot-password")
+    @EndpointHandler(endpoint = "POST /forgot-password")
     public Response cmdForgotPassword(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -188,7 +188,7 @@ public class UserController {
             return new UnsuccessfulResponse("400 Bad app.Request", "Invalid JSON format");
         }
     }
-    @EndpointHandler(method = "POST",endpoint = " /reset-password/finish")
+    @EndpointHandler(endpoint = "POST /reset-password/finish")
     public Response cmdResetPasswordFinish(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
 
@@ -215,7 +215,7 @@ public class UserController {
             return new UnsuccessfulResponse("400 Bad app.Request", "Invalid JSON format");
         }
     }
-    @EndpointHandler(method = "DELETE",endpoint = " /user")
+    @EndpointHandler(endpoint = "DELETE /user")
     public Response cmdDeleteUser(Request objRequest) {
         User user = database.findUserById((String) objRequest.getQueryString().get("id"));
         if (user == null) {
