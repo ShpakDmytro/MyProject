@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 import app.controllers.*;
 import app.response.*;
+import org.reflections.Reflections;
 
 
 public class Server {
@@ -118,6 +119,7 @@ public class Server {
             }
 
         } catch (Throwable e) {
+            System.out.println(e);
             response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
 
@@ -128,24 +130,22 @@ public class Server {
 
     private Response checkRequestForEndpoint(Request objRequest) {
 
-        Controller[] controllers = new Controller[]{ new UserController(), new ProductController()};
+        Reflections ref = new Reflections("app");
+        for (Class<?> cl : ref.getTypesAnnotatedWith(Controller.class)) {
 
-        for (Controller controller : controllers) {
-            Method[] methods = controller.getClass().getDeclaredMethods();
-
+            Method[] methods = cl.getDeclaredMethods();
             for (Method m : methods) {
-                Annotation[] annotations = m.getDeclaredAnnotations();
 
+                Annotation[] annotations = m.getDeclaredAnnotations();
                 for (Annotation an : annotations) {
 
                     if (an instanceof EndpointHandler) {
                         if (((EndpointHandler) an).endpoint().equals(objRequest.getEndpoint())) {
                             try {
 
-                                return (Response) m.invoke(controller, objRequest);
-                            } catch (IllegalAccessException e) {
-                                throw new RuntimeException(e);
-                            } catch (InvocationTargetException e) {
+                                return (Response) m.invoke(cl.getDeclaredConstructor().newInstance(), objRequest);
+                            } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
+                                     NoSuchMethodException e) {
                                 throw new RuntimeException(e);
                             }
                         }

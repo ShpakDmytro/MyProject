@@ -10,8 +10,8 @@ import app.models.*;
 import app.exception.*;
 import app.response.*;
 import app.*;
-
-public class UserController implements Controller {
+@Controller
+public class UserController {
 
     private Database database;
 

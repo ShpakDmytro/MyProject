@@ -10,8 +10,8 @@ import app.models.*;
 import app.exception.*;
 import app.response.*;
 import app.*;
-
-public class ProductController implements Controller {
+@Controller
+public class ProductController {
 
     private Database database;
 
