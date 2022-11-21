@@ -10,7 +10,7 @@ import app.models.*;
 import app.exception.*;
 import app.response.*;
 import app.*;
-
+@Controller
 public class ProductController {
 
     private Database database;
@@ -39,7 +39,7 @@ public class ProductController {
 
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
     }
-    @EndpointHandler(endpoint = "GET /products ")
+    @EndpointHandler(endpoint = "GET /products")
     public Response cmdFindProducts(Request objRequest) {
 
         ArrayList<Product> allProduct = database.findProducts(objRequest.getQueryString());
