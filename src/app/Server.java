@@ -5,17 +5,22 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
+import java.sql.Time;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Locale;
+
 import app.response.*;
 import org.reflections.Reflections;
 
 
 public class Server {
     static final int port = 8080;
+    private Logger logger;
 
     public Server() {
-
+        this.logger = new Logger();
     }
 
     public static void main(String[] args) {
@@ -29,6 +34,7 @@ public class Server {
 
             while (true) {
                 Socket connection = socket.accept();
+                logger.log("Start connection", "INFO",getClass().toString());
 
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -40,6 +46,7 @@ public class Server {
                     System.err.println("Error handling request: " + tri);
                 }
                 connection.close();
+                logger.log("Finish connection","INFO",getClass().toString());
             }
         } catch (Throwable tr) {
             System.err.println("Could not start server: " + tr);
@@ -76,21 +83,21 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
-        System.out.println(requestAsString);
+        logger.log(requestAsString,"INFO",getClass().toString());
         String method = requestAsString.split("\n")[0].split(" ")[0];
         String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
-        System.out.println(method);
-        System.out.println(command);
-
+        logger.log(method+command,"INGO",getClass().toString());
         String body = "";
 
         try {
             body = requestAsString.split("\n\n")[1];
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+        } catch (ArrayIndexOutOfBoundsException e) {
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
         }
-        System.out.println(body);
+        logger.log(body,"INFO",getClass().toString());
         if (requestAsString.split("\n")[0].contains("?")) {
             String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
+            logger.log(queryString,"INFO",getClass().toString());
             String[] querys = queryString.split("&");
             for (String query : querys) {
                 queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
@@ -117,11 +124,12 @@ public class Server {
             }
 
         } catch (Throwable e) {
-            System.err.println(e);
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
             response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
 
         pout.print(response.serialize());
+        logger.log(response.serialize(), "INFO",getClass().toString());
         pout.close();
 
     }
@@ -138,12 +146,14 @@ public class Server {
                 for (Annotation an : annotations) {
 
                     if (an instanceof EndpointHandler) {
+
                         if (((EndpointHandler) an).endpoint().equals(objRequest.getEndpoint())) {
                             try {
-
+                                logger.log(m.getName(),"INFO",getClass().toString());
                                 return (Response) m.invoke(cl.getDeclaredConstructor().newInstance(), objRequest);
                             } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                                      NoSuchMethodException e) {
+                                logger.log("Parse annotation exception" + e,"ERROR",getClass().toString());
                                 throw new RuntimeException(e);
                             }
                         }

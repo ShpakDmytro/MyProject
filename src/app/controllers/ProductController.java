@@ -14,9 +14,11 @@ import app.*;
 public class ProductController {
 
     private Database database;
+    private Logger logger;
 
     public ProductController(){
         this.database = new Database();
+        this.logger = new Logger();
     }
     @EndpointHandler(endpoint = "POST /product")
     public Response cmdNewProduct(Request objRequest) {
@@ -34,7 +36,8 @@ public class ProductController {
             database.insertProduct(product);
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
@@ -62,17 +65,18 @@ public class ProductController {
             productIdForBuying = (String) buyingRequest.get("productId");
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
         User user = database.findUserById(userIdForBuying);
         if (user == null) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong user id");
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong user id");
         }
 
         Product product = database.findProductById(productIdForBuying);
         if (product == null) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong product id");
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
         }
 
         try {
@@ -83,10 +87,10 @@ public class ProductController {
             database.closeTransaction();
             return new SuccessfulResponseMessage("200 OK", "You did successful buying");
         } catch (NotEnoughMoneyException exception) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "User don`t have enough money");
+            return new UnsuccessfulResponse("400 Bad Request", "User don`t have enough money");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("500 Internal app.Server Error", "Something wrong");
+            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
     @EndpointHandler(endpoint = "PATCH /product")
@@ -109,7 +113,8 @@ public class ProductController {
             database.updateProduct(product);
 
         } catch (JsonProcessingException e) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong request format");
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
         return new SuccessfulResponseMessage("200 OK", "Product update successful");
@@ -133,7 +138,8 @@ public class ProductController {
             return new SuccessfulResponseMessage("200 OK", "Product successful delete");
         } catch (Exception e) {
             database.rollback();
-            return new UnsuccessfulResponse("500 Internal app.Server Error", "Something wrong");
+            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
 
