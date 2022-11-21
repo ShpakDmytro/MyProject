@@ -7,8 +7,6 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import app.controllers.*;
 import app.response.*;
 import org.reflections.Reflections;
 
@@ -119,7 +117,7 @@ public class Server {
             }
 
         } catch (Throwable e) {
-            System.out.println(e);
+            System.err.println(e);
             response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
 
