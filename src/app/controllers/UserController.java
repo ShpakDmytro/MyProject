@@ -11,7 +11,7 @@ import app.exception.*;
 import app.response.*;
 import app.*;
 
-public class UserController {
+public class UserController implements Controller {
 
     private Database database;
 

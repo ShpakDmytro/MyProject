@@ -1,9 +1,13 @@
 package app;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+
 import app.controllers.*;
 import app.response.*;
 
@@ -105,58 +109,50 @@ public class Server {
     }
 
     private void programLogic(Request objRequest, PrintStream pout) {
+
         Response response = null;
         try {
-            if (objRequest.getEndpoint().equals("POST /sign-up")) {
-                response = new UserController().cmdSignUp(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /finish-sign-up")) {
-                response = new UserController().cmdFinishSignUp(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /sign-in")) {
-                response = new UserController().cmdSignIn(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /sign-out")) {
-                response = new UserController().cmdSignOut(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /product")) {
-                response = new ProductController().cmdNewProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("GET /users")) {
-                response = new UserController().cmdFindUsers(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("GET /products")) {
-                response = new ProductController().cmdFindProducts(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /bought-product")) {
-                response = new ProductController().cmdBuyProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("PATCH /product")) {
-                response = new ProductController().cmdPatchProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("PATCH /user")) {
-                response = new UserController().cmdPatchUser(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /forgot-password")) {
-                response = new UserController().cmdForgotPassword(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("POST /reset-password/finish")) {
-                response = new UserController().cmdResetPasswordFinish(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("DELETE /product")) {
-                response = new ProductController().cmdDeleteProduct(objRequest);
-
-            } else if (objRequest.getEndpoint().equals("DELETE /user")) {
-                response = new UserController().cmdDeleteUser(objRequest);
-
-            } else {
+            response = checkRequestForEndpoint(objRequest);
+            if (response == null) {
                 response = new UnsuccessfulResponse("404 Not Found", "Unknown command");
             }
-        } catch (Throwable throwable) {
-            response = new UnsuccessfulResponse("500 Internal app.Server Error", "app.Server mistake");
+
+        } catch (Throwable e) {
+            response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
+
         pout.print(response.serialize());
         pout.close();
 
+    }
+
+    private Response checkRequestForEndpoint(Request objRequest) {
+
+        Controller[] controllers = new Controller[]{ new UserController(), new ProductController()};
+
+        for (Controller controller : controllers) {
+            Method[] methods = controller.getClass().getDeclaredMethods();
+
+            for (Method m : methods) {
+                Annotation[] annotations = m.getDeclaredAnnotations();
+
+                for (Annotation an : annotations) {
+
+                    if (an instanceof EndpointHandler) {
+                        if (((EndpointHandler) an).endpoint().equals(objRequest.getEndpoint())) {
+                            try {
+
+                                return (Response) m.invoke(controller, objRequest);
+                            } catch (IllegalAccessException e) {
+                                throw new RuntimeException(e);
+                            } catch (InvocationTargetException e) {
+                                throw new RuntimeException(e);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }
