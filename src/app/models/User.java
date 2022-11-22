@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.UUID;
 import app.exception.*;
 
-
-
 public class User {
     private String id;
     private String firstName;

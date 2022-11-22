@@ -7,17 +7,16 @@ import java.net.*;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.HashMap;
-
-import app.controllers.*;
 import app.response.*;
 import org.reflections.Reflections;
 
 
 public class Server {
     static final int port = 8080;
+    private Logger logger;
 
     public Server() {
-
+        this.logger = new Logger();
     }
 
     public static void main(String[] args) {
@@ -31,6 +30,7 @@ public class Server {
 
             while (true) {
                 Socket connection = socket.accept();
+                logger.log("Start connection", "INFO");
 
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -39,11 +39,15 @@ public class Server {
                     programLogic(readRequest(in), pout);
 
                 } catch (Throwable tri) {
+                    logger.log(tri.getMessage(),"ERROR");
                     System.err.println("Error handling request: " + tri);
                 }
+
                 connection.close();
+                logger.log("Finish connection","INFO");
             }
         } catch (Throwable tr) {
+            logger.log(tr.getMessage(),"ERROR");
             System.err.println("Could not start server: " + tr);
         }
     }
@@ -54,12 +58,29 @@ public class Server {
         ArrayList<String> headers = new ArrayList<>();
         StringBuilder requestInSb = new StringBuilder();
         HashMap<String, String> queryStringAsHashMap = new HashMap<>();
+        int count = 0;
+        String method = "";
+        String command = "";
 
         while (true) {
             String line = in.readLine();
 
             if (line == null || line.length() == 0) break;
             else requestInSb.append(line).append("\n");
+
+            if (count == 0){
+                method = line.split(" ")[0];
+                command = line.split(" ")[1].split("\\?")[0];
+
+                if (line.split(" ")[1].contains("?")) {
+                    String queryString = line.split(" ")[1].split("\\?")[1];
+                    logger.log(queryString,"INFO");
+                    String[] querys = queryString.split("&");
+                    for (String query : querys) {
+                        queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
+                    }
+                }
+            }
 
             if (line.split(":")[0].equals("Content-Length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
@@ -68,6 +89,7 @@ public class Server {
             if (line.contains(":")) {
                 headers.add(line);
             }
+            count++;
         }
         requestInSb.append("\n");
 
@@ -78,25 +100,13 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
-        System.out.println(requestAsString);
-        String method = requestAsString.split("\n")[0].split(" ")[0];
-        String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
-        System.out.println(method);
-        System.out.println(command);
 
         String body = "";
 
         try {
             body = requestAsString.split("\n\n")[1];
-        } catch (ArrayIndexOutOfBoundsException ignored) {
-        }
-        System.out.println(body);
-        if (requestAsString.split("\n")[0].contains("?")) {
-            String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
-            String[] querys = queryString.split("&");
-            for (String query : querys) {
-                queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
-            }
+        } catch (ArrayIndexOutOfBoundsException e) {
+            logger.log(e.getMessage(), "ERROR");
         }
 
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
@@ -119,13 +129,12 @@ public class Server {
             }
 
         } catch (Throwable e) {
-            System.out.println(e);
+            logger.log(e.getMessage(),"ERROR");
             response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
 
         pout.print(response.serialize());
         pout.close();
-
     }
 
     private Response checkRequestForEndpoint(Request objRequest) {
@@ -140,12 +149,14 @@ public class Server {
                 for (Annotation an : annotations) {
 
                     if (an instanceof EndpointHandler) {
+
                         if (((EndpointHandler) an).endpoint().equals(objRequest.getEndpoint())) {
                             try {
-
+                                logger.log(m.getName(),"INFO");
                                 return (Response) m.invoke(cl.getDeclaredConstructor().newInstance(), objRequest);
                             } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                                      NoSuchMethodException e) {
+                                logger.log(e.getMessage(),"ERROR");
                                 throw new RuntimeException(e);
                             }
                         }
