@@ -5,12 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
-import java.sql.Time;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Locale;
-
 import app.response.*;
 import org.reflections.Reflections;
 
@@ -43,6 +39,7 @@ public class Server {
                     programLogic(readRequest(in), pout);
 
                 } catch (Throwable tri) {
+                    tri.printStackTrace();
                     System.err.println("Error handling request: " + tri);
                 }
                 connection.close();
@@ -59,12 +56,29 @@ public class Server {
         ArrayList<String> headers = new ArrayList<>();
         StringBuilder requestInSb = new StringBuilder();
         HashMap<String, String> queryStringAsHashMap = new HashMap<>();
+        int count = 0;
+        String method = "";
+        String command = "";
 
         while (true) {
             String line = in.readLine();
 
             if (line == null || line.length() == 0) break;
-            else requestInSb.append(line).append("\n");
+            else requestInSb.append(line).append("\r\n");
+
+            if (count == 0){
+                method = line.split(" ")[0];
+                command = line.split(" ")[1].split("\\?")[0];
+
+                if (line.split(" ")[1].contains("?")) {
+                    String queryString = line.split(" ")[1].split("\\?")[1];
+                    logger.log(queryString,"INFO",getClass().toString());
+                    String[] querys = queryString.split("&");
+                    for (String query : querys) {
+                        queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
+                    }
+                }
+            }
 
             if (line.split(":")[0].equals("Content-Length")) {
                 contentLength = Integer.parseInt(line.split(":")[1].trim());
@@ -73,8 +87,9 @@ public class Server {
             if (line.contains(":")) {
                 headers.add(line);
             }
+            count++;
         }
-        requestInSb.append("\n");
+        requestInSb.append("\r\n");
 
         int read = 0;
         while (read < contentLength) {
@@ -83,26 +98,16 @@ public class Server {
         }
 
         String requestAsString = requestInSb.toString();
-        logger.log(requestAsString,"INFO",getClass().toString());
-        String method = requestAsString.split("\n")[0].split(" ")[0];
-        String command = requestAsString.split("\n")[0].split(" ")[1].split("\\?")[0];
-        logger.log(method+command,"INGO",getClass().toString());
+
         String body = "";
 
         try {
-            body = requestAsString.split("\n\n")[1];
+            body = requestAsString.split("\r\n\r\n")[1];
         } catch (ArrayIndexOutOfBoundsException e) {
             logger.log(e.getMessage(),"ERROR",getClass().toString());
         }
         logger.log(body,"INFO",getClass().toString());
-        if (requestAsString.split("\n")[0].contains("?")) {
-            String queryString = requestAsString.split("\n")[0].split("\\?")[1].split(" ")[0];
-            logger.log(queryString,"INFO",getClass().toString());
-            String[] querys = queryString.split("&");
-            for (String query : querys) {
-                queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
-            }
-        }
+
 
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {

@@ -100,7 +100,7 @@ public class ProductController {
             HashMap updateProduct = mapper.readValue(objRequest.getBody(), HashMap.class);
             if (updateProduct.containsKey("price")) {
                 if ((Double) updateProduct.get("price") <= 0) {
-                    return new UnsuccessfulResponse("400", "Wrong amount value");
+                    return new UnsuccessfulResponse("400 Bad Request", "Wrong amount value");
                 }
             }
             Product product = database.findProductById((String) objRequest.getQueryString().get("id"));
@@ -123,7 +123,7 @@ public class ProductController {
     public Response cmdDeleteProduct(Request objRequest) {
         Product product = database.findProductById((String) objRequest.getQueryString().get("id"));
         if (product == null) {
-            return new UnsuccessfulResponse("400 Bad app.Request", "Wrong product id");
+            return new UnsuccessfulResponse("400 Bad Request", "Wrong product id");
         }
         try {
             ArrayList<Purchase> purchases = database.findPurchasesByProductId((String) objRequest.getQueryString().get("id"));
@@ -142,5 +142,4 @@ public class ProductController {
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
-
 }

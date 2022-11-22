@@ -7,17 +7,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class Logger {
-    LocalDate date = LocalDate.now();
-    LocalTime time = LocalTime.now();
 
     public void log(String message, String status, String app){
-
+    ///app - program
         try {
-            FileWriter writer = new FileWriter("C:\\projects\\Myproject\\log.txt", true);
+            FileWriter writer = new FileWriter("D:\\projects\\Myprodject\\log.txt", true);
             BufferedWriter bufferWriter = new BufferedWriter(writer);
-            String readyToWrite = date + " " + time + " [" + app + "]" + " [" + status + "]" + " [" + message + "]" +"\n";
+            String readyToWrite = LocalDate.now() + " " + LocalTime.now() + " [" + app + "]" + " [" + status + "]" + message +"\n";
             bufferWriter.write(readyToWrite);
-            System.out.println(readyToWrite);
             bufferWriter.close();
         }
         catch (IOException e) {
