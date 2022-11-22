@@ -8,17 +8,17 @@ import java.time.LocalTime;
 
 public class Logger {
 
-    public void log(String message, String status, String app){
-    ///app - program
+    public void log(String message, String status){
+
         try {
             FileWriter writer = new FileWriter("D:\\projects\\Myprodject\\log.txt", true);
             BufferedWriter bufferWriter = new BufferedWriter(writer);
-            String readyToWrite = LocalDate.now() + " " + LocalTime.now() + " [" + app + "]" + " [" + status + "]" + message +"\n";
+            String readyToWrite = LocalDate.now() + " " + LocalTime.now() + " [ app ]" + " [" + status + "] " + message +"\n";
             bufferWriter.write(readyToWrite);
             bufferWriter.close();
         }
         catch (IOException e) {
-            System.out.println(e);
+            System.err.println(e);
         }
     }
 }

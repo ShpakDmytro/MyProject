@@ -36,7 +36,6 @@ public class ProductController {
             database.insertProduct(product);
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -65,7 +64,6 @@ public class ProductController {
             productIdForBuying = (String) buyingRequest.get("productId");
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -90,6 +88,7 @@ public class ProductController {
             return new UnsuccessfulResponse("400 Bad Request", "User don`t have enough money");
         } catch (Exception e) {
             database.rollback();
+            logger.log(e.getMessage(),"ERROR");
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
@@ -113,7 +112,6 @@ public class ProductController {
             database.updateProduct(product);
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -138,7 +136,7 @@ public class ProductController {
             return new SuccessfulResponseMessage("200 OK", "Product successful delete");
         } catch (Exception e) {
             database.rollback();
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }

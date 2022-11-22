@@ -30,7 +30,7 @@ public class Server {
 
             while (true) {
                 Socket connection = socket.accept();
-                logger.log("Start connection", "INFO",getClass().toString());
+                logger.log("Start connection", "INFO");
 
                 try {
                     BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
@@ -39,13 +39,15 @@ public class Server {
                     programLogic(readRequest(in), pout);
 
                 } catch (Throwable tri) {
-                    tri.printStackTrace();
+                    logger.log(tri.getMessage(),"ERROR");
                     System.err.println("Error handling request: " + tri);
                 }
+
                 connection.close();
-                logger.log("Finish connection","INFO",getClass().toString());
+                logger.log("Finish connection","INFO");
             }
         } catch (Throwable tr) {
+            logger.log(tr.getMessage(),"ERROR");
             System.err.println("Could not start server: " + tr);
         }
     }
@@ -64,7 +66,7 @@ public class Server {
             String line = in.readLine();
 
             if (line == null || line.length() == 0) break;
-            else requestInSb.append(line).append("\r\n");
+            else requestInSb.append(line).append("\n");
 
             if (count == 0){
                 method = line.split(" ")[0];
@@ -72,7 +74,7 @@ public class Server {
 
                 if (line.split(" ")[1].contains("?")) {
                     String queryString = line.split(" ")[1].split("\\?")[1];
-                    logger.log(queryString,"INFO",getClass().toString());
+                    logger.log(queryString,"INFO");
                     String[] querys = queryString.split("&");
                     for (String query : querys) {
                         queryStringAsHashMap.put(query.split("=")[0], query.split("=")[1]);
@@ -89,7 +91,7 @@ public class Server {
             }
             count++;
         }
-        requestInSb.append("\r\n");
+        requestInSb.append("\n");
 
         int read = 0;
         while (read < contentLength) {
@@ -102,12 +104,10 @@ public class Server {
         String body = "";
 
         try {
-            body = requestAsString.split("\r\n\r\n")[1];
+            body = requestAsString.split("\n\n")[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
         }
-        logger.log(body,"INFO",getClass().toString());
-
 
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();
         for (String header : headers) {
@@ -129,14 +129,12 @@ public class Server {
             }
 
         } catch (Throwable e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             response = new UnsuccessfulResponse("500 Internal Server Error", "Server mistake");
         }
 
         pout.print(response.serialize());
-        logger.log(response.serialize(), "INFO",getClass().toString());
         pout.close();
-
     }
 
     private Response checkRequestForEndpoint(Request objRequest) {
@@ -154,11 +152,11 @@ public class Server {
 
                         if (((EndpointHandler) an).endpoint().equals(objRequest.getEndpoint())) {
                             try {
-                                logger.log(m.getName(),"INFO",getClass().toString());
+                                logger.log(m.getName(),"INFO");
                                 return (Response) m.invoke(cl.getDeclaredConstructor().newInstance(), objRequest);
                             } catch (IllegalAccessException | InvocationTargetException | InstantiationException |
                                      NoSuchMethodException e) {
-                                logger.log("Parse annotation exception" + e,"ERROR",getClass().toString());
+                                logger.log(e.getMessage(),"ERROR");
                                 throw new RuntimeException(e);
                             }
                         }

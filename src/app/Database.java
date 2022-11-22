@@ -22,7 +22,7 @@ public class Database {
                     "jdbc:mysql://db-mysql-lon1-60836-do-user-2065621-0.b.db.ondigitalocean.com:25060/defaultdb",
                     "dima", "AVNS_7XEtwNq4TW_QQ5PqQIU");
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         }
     }
@@ -43,16 +43,16 @@ public class Database {
             stmt.setString(8, user.getStatus());
             stmt.setString(9, user.getConfirmationCode());
             stmt.setString(10, user.getPasswordResetCode());
-            logger.log(stmt.toString(),"INFO",getClass().toString());
+            logger.log(stmt.toString(),"INFO");
             stmt.execute();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -65,17 +65,17 @@ public class Database {
             stmt.setString(1, product.getId());
             stmt.setString(2, product.getName());
             stmt.setDouble(3, product.getPrice());
-            logger.log(stmt.toString(),"INFO",getClass().toString());
+            logger.log(stmt.toString(),"INFO");
             stmt.execute();
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -89,17 +89,17 @@ public class Database {
             stmt.setString(2, product.getName());
             stmt.setDouble(3, product.getPrice());
             stmt.setString(4, product.getId());
-            logger.log(stmt.toString(),"INFO",getClass().toString());
+            logger.log(stmt.toString(),"INFO");
             stmt.execute();
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -118,11 +118,11 @@ public class Database {
             stmt.setString(1, purchase.getId());
             stmt.setString(2, purchase.getUserId());
             stmt.setString(3, purchase.getProductId());
-            logger.log(stmt.toString(),"INFO",getClass().toString());
+            logger.log(stmt.toString(),"INFO");
             stmt.execute();
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
@@ -130,7 +130,7 @@ public class Database {
                     connection.close();
                 }
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -158,11 +158,11 @@ public class Database {
             stmt.setString(9, user.getConfirmationCode());
             stmt.setString(10, user.getPasswordResetCode());
             stmt.setString(11, user.getId());
-            logger.log(stmt.toString(),"INFO",getClass().toString());
+            logger.log(stmt.toString(),"INFO");
             stmt.execute();
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
@@ -170,7 +170,7 @@ public class Database {
                     connection.close();
                 }
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -181,20 +181,20 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE login = ?");
             statement.setString(1, loginFromUser);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
                 return true;
             }
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -207,7 +207,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE login = ?");
             statement.setString(1, login);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             User user = null;
@@ -220,13 +220,13 @@ public class Database {
             }
             return user;
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -238,7 +238,7 @@ public class Database {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE login = ? AND password = ?");
             statement.setString(1, login);
             statement.setString(2, password);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -249,13 +249,13 @@ public class Database {
                         resultSet.getString("confirmationCode"), resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -267,7 +267,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE accessToken = ?");
             statement.setString(1, accessToken);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -278,13 +278,13 @@ public class Database {
                         resultSet.getString("confirmationCode"), resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -296,7 +296,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM users WHERE id = ?");
             statement.setString(1, id);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -307,13 +307,13 @@ public class Database {
                         resultSet.getString("confirmationCode"), resultSet.getString("passwordResetCode"));
             }
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -325,7 +325,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM products WHERE id = ?");
             statement.setString(1, id);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -333,13 +333,13 @@ public class Database {
                         resultSet.getDouble("price"));
             }
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -426,7 +426,7 @@ public class Database {
             for (int i = 0; i < preparedStatementValues.size(); i++) {
                 statement.setString(i + 1, preparedStatementValues.get(i));
             }
-            logger.log(sqlQuery,"INFO",getClass().toString());
+            logger.log(sqlQuery,"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -439,13 +439,13 @@ public class Database {
             }
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
         return usersForResponse;
@@ -488,7 +488,7 @@ public class Database {
             for (int i = 0; i < preparedStatementValues.size(); i++) {
                 statement.setString(i + 1, preparedStatementValues.get(i));
             }
-            logger.log(sqlQuery,"INFO",getClass().toString());
+            logger.log(sqlQuery,"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -498,13 +498,13 @@ public class Database {
             }
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
         return productsForResponse;
@@ -517,7 +517,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE productId = ?");
             statement.setString(1, id);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -527,13 +527,13 @@ public class Database {
             }
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -547,7 +547,7 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("SELECT * FROM purchases WHERE userId = ?");
             statement.setString(1, id);
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             ResultSet resultSet = statement.executeQuery();
 
             while (resultSet.next()) {
@@ -557,13 +557,13 @@ public class Database {
             }
 
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
                 connection.close();
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
 
@@ -574,10 +574,10 @@ public class Database {
         this.transactionConnection = createConnection();
         try {
             PreparedStatement statement = transactionConnection.prepareStatement("START TRANSACTION;");
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         }
     }
@@ -585,11 +585,11 @@ public class Database {
     public void closeTransaction() {
         try {
             PreparedStatement statement = transactionConnection.prepareStatement("COMMIT");
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
             this.transactionConnection.close();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         }
     }
@@ -597,11 +597,11 @@ public class Database {
     public void rollback() {
         try {
             PreparedStatement statement = transactionConnection.prepareStatement("ROLLBACK");
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
             this.transactionConnection.close();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         }
     }
@@ -616,10 +616,10 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("DELETE FROM products WHERE id = ?");
             statement.setString(1, product.getId());
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
@@ -627,7 +627,7 @@ public class Database {
                     connection.close();
                 }
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -642,10 +642,10 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("DELETE FROM purchases WHERE id = ?");
             statement.setString(1, purchase.getId());
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
@@ -653,7 +653,7 @@ public class Database {
                     connection.close();
                 }
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }
@@ -668,10 +668,10 @@ public class Database {
         try {
             PreparedStatement statement = connection.prepareStatement("DELETE FROM users WHERE id = ?");
             statement.setString(1, user.getId());
-            logger.log(statement.toString(),"INFO",getClass().toString());
+            logger.log(statement.toString(),"INFO");
             statement.execute();
         } catch (SQLException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             throw new RuntimeException(e);
         } finally {
             try {
@@ -679,7 +679,7 @@ public class Database {
                     connection.close();
                 }
             } catch (SQLException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
+                logger.log(e.getMessage(),"ERROR");
             }
         }
     }

@@ -45,7 +45,6 @@ public class UserController {
             smSsender.sendSms(user.getLogin(), user.getConfirmationCode());
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -73,7 +72,6 @@ public class UserController {
             }
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
         return new UnsuccessfulResponse("404 Not Found", "User not found");
@@ -95,7 +93,6 @@ public class UserController {
             }
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -117,7 +114,6 @@ public class UserController {
             }
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -164,7 +160,6 @@ public class UserController {
             database.updateUser(user);
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Wrong request format");
         }
 
@@ -192,7 +187,6 @@ public class UserController {
             return new SuccessfulResponseMessage("200 OK", "Send password reset code");
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
@@ -212,17 +206,14 @@ public class UserController {
             try {
                 user.changePasswordFromResetCode((String) request.get("passwordResetCode"),(String) request.get("password"));
             } catch (BadPasswordResetCodeException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
                 return new UnsuccessfulResponse("400 Bad Request", "Wrong reset code");
             } catch (PasswordResetNotRequestedCodeException e) {
-                logger.log(e.getMessage(),"ERROR",getClass().toString());
                 return new UnsuccessfulResponse("400 Bad Request", "Reset code not requested");
             }
             database.updateUser(user);
             return new SuccessfulResponseMessage("200 OK", "Password successful changed");
 
         } catch (JsonProcessingException e) {
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
             return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
@@ -247,7 +238,7 @@ public class UserController {
             return new SuccessfulResponseMessage("200 OK", "User successful delete");
         } catch (Exception e) {
             database.rollback();
-            logger.log(e.getMessage(),"ERROR",getClass().toString());
+            logger.log(e.getMessage(),"ERROR");
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
