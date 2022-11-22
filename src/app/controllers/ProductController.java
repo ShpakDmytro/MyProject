@@ -2,7 +2,6 @@ package app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -10,6 +9,7 @@ import app.models.*;
 import app.exception.*;
 import app.response.*;
 import app.*;
+
 @Controller
 public class ProductController {
 
@@ -20,6 +20,7 @@ public class ProductController {
         this.database = new Database();
         this.logger = new Logger();
     }
+
     @EndpointHandler(endpoint = "POST /product")
     public Response cmdNewProduct(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -41,6 +42,7 @@ public class ProductController {
 
         return new SuccessfulResponseMessage("200 OK", "Add product successful");
     }
+
     @EndpointHandler(endpoint = "GET /products")
     public Response cmdFindProducts(Request objRequest) {
 
@@ -52,6 +54,7 @@ public class ProductController {
 
         return new SuccessfulResponseArray("200 OK", allProductForResponse);
     }
+
     @EndpointHandler(endpoint = "POST /bought-product")
     public Response cmdBuyProduct(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -92,6 +95,7 @@ public class ProductController {
             return new UnsuccessfulResponse("500 Internal Server Error", "Something wrong");
         }
     }
+
     @EndpointHandler(endpoint = "PATCH /product")
     public Response cmdPatchProduct(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -117,6 +121,7 @@ public class ProductController {
 
         return new SuccessfulResponseMessage("200 OK", "Product update successful");
     }
+
     @EndpointHandler(endpoint = "DELETE /product")
     public Response cmdDeleteProduct(Request objRequest) {
         Product product = database.findProductById((String) objRequest.getQueryString().get("id"));

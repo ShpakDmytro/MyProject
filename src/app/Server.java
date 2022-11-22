@@ -106,7 +106,7 @@ public class Server {
         try {
             body = requestAsString.split("\n\n")[1];
         } catch (ArrayIndexOutOfBoundsException e) {
-            logger.log(e.getMessage(),"ERROR");
+            logger.log(e.getMessage(), "ERROR");
         }
 
         ArrayList<HTTPHeader> headersAsObject = new ArrayList<>();

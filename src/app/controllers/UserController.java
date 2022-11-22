@@ -2,7 +2,6 @@ package app.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.UUID;
@@ -10,6 +9,7 @@ import app.models.*;
 import app.exception.*;
 import app.response.*;
 import app.*;
+
 @Controller
 public class UserController {
 
@@ -50,6 +50,7 @@ public class UserController {
 
         return new SuccessfulResponseMessage("200 OK", "Successful add new user");
     }
+
     @EndpointHandler(endpoint = "POST /finish-sign-up")
     public Response cmdFinishSignUp(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -76,6 +77,7 @@ public class UserController {
         }
         return new UnsuccessfulResponse("404 Not Found", "User not found");
     }
+
     @EndpointHandler(endpoint = "POST /sign-in")
     public Response cmdSignIn(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -98,6 +100,7 @@ public class UserController {
 
         return new UnsuccessfulResponse("400 Bad Request", "No user found");
     }
+
     @EndpointHandler(endpoint = "POST /sign-out")
     public Response cmdSignOut(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -119,6 +122,7 @@ public class UserController {
 
         return new UnsuccessfulResponse("400 Bad Request", "No user found");
     }
+
     @EndpointHandler(endpoint = "GET /users")
     public Response cmdFindUsers(Request objRequest) {
 
@@ -130,6 +134,7 @@ public class UserController {
         return new SuccessfulResponseArray("200 OK", allUsersForResponse);
 
     }
+
     @EndpointHandler(endpoint = "PATCH /user")
     public Response cmdPatchUser(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -165,6 +170,7 @@ public class UserController {
 
         return new SuccessfulResponseMessage("200 OK", "User update successful");
     }
+
     @EndpointHandler(endpoint = "POST /forgot-password")
     public Response cmdForgotPassword(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -190,6 +196,7 @@ public class UserController {
             return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
+
     @EndpointHandler(endpoint = "POST /reset-password/finish")
     public Response cmdResetPasswordFinish(Request objRequest) {
         ObjectMapper mapper = new ObjectMapper();
@@ -217,6 +224,7 @@ public class UserController {
             return new UnsuccessfulResponse("400 Bad Request", "Invalid JSON format");
         }
     }
+
     @EndpointHandler(endpoint = "DELETE /user")
     public Response cmdDeleteUser(Request objRequest) {
         User user = database.findUserById((String) objRequest.getQueryString().get("id"));
